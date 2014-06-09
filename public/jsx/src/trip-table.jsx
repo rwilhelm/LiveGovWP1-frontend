@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-var HelloWorld = React.createClass({
+var TripTable = React.createClass({
   render: function() {
     return (
       <p>
@@ -10,9 +10,7 @@ var HelloWorld = React.createClass({
   }
 });
 
-setInterval(function() {
-  React.renderComponent(
-    <HelloWorld date={new Date()} />,
-    document.getElementById('example')
-  );
-}, 500);
+React.renderComponent(
+  <HelloWorld date={new Date()} />,
+  document.getElementById('trip-table')
+);

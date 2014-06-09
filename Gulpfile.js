@@ -13,12 +13,12 @@ var onError = function (err) {
 
 // compile react components
 gulp.task('react', function() {
-  return gulp.src('./public/js/components/src')
+  return gulp.src('./public/jsx/src')
     .pipe(plumber({ errorHandler: onError }))
     .pipe(react({
       harmony: true
     }))
-    .pipe(gulp.dest('./public/js/components'));
+    .pipe(gulp.dest('./public/jsx'));
 });
 
 // recompile sass files (two short beeps: success, anything else: probably failure)
@@ -36,7 +36,7 @@ gulp.task('sass', function () {
 // watch stuff for changes
 gulp.task('watch', function () {
   gulp.watch(['public/css/*.scss'], ['sass']);
-  gulp.watch(['public/js/elements/src/*jsx'], ['react']);
+  gulp.watch(['public/jsx/src/*jsx'], ['react']);
 });
 
 // start the server using nodemon (so it restarts if neccessary)
@@ -70,8 +70,8 @@ gulp.task('server', function () {
       'package.json',
       'public/css/*.css',
       'public/css/*.map',
-      'public/js/components/*.js',
-      'public/js/components/.module-cache/',
+      'public/jsx/*.js',
+      'public/jsx/.module-cache/',
       'test/',
     ]
   })
