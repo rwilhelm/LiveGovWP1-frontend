@@ -17,16 +17,11 @@ html(lang="en", ng-app="inspectionFrontEnd")
     link(rel="stylesheet", href='./bower_components/mapbox.js/theme/style.css')
     link(rel="stylesheet", href="./bower_components/bootstrap/dist/css/bootstrap.min.css")
     link(rel="stylesheet", href="./bower_components/angular-xeditable/dist/css/xeditable.css")
-    link(rel="stylesheet", href="./css/001.css")
-
-    link(rel="import", href="../bower_components/polymer/polymer.html")
+    link(rel="stylesheet", href="./css/index.css")
 
     script(src="./bower_components/angular/angular.js")
 
   body(ng-controller="mainCtrl as main")
-
-    script(type="text/jsx", src="./jsx/trip-table.js")
-
     header
       nav.navbar.navbar-default.navbar-fixed-top.navbar-inverse(role="navigation" ng-controller="navCtrl as ctrl")
         ul.nav.navbar-nav
