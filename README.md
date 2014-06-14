@@ -38,6 +38,13 @@ production  | 4001
 
 
 
+### Rendering jade templates
+
+Serving templates via the api seems to be more easily configurable.
+
+
+
+
 
 
 

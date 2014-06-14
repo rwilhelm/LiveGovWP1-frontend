@@ -2,30 +2,28 @@
 /* globals app */
 'use strict'; // jshint -W097
 
-//- NOTE be careful to specify paths relative to the current directory
-
 app.config(function ($routeProvider, $locationProvider) {
-  // $locationProvider.html5Mode(true);
+  $locationProvider.html5Mode(false);
   // $locationProvider.hashPrefix('!');
 
-  // NOTE
-  // paths must be relative and without leading ./ (e.g. localhost:3001/#/rec)
+  // NOTE paths to local fs must be relative and without leading ./ (e.g.
+  // localhost:3001/#/rec)
 
   $routeProvider
-    .when('/rec/:trip_id?', {
-      templateUrl: 'templates/rec',
+    .when('rec/:trip_id?', {
+      templateUrl: 'html/rec.html',
     })
 
     .when('/raw/:trip_id?', {
-      templateUrl: 'templates/raw',
+      templateUrl: 'html/raw.html',
     })
 
     .when('/har/:trip_id?', {
-      templateUrl: 'templates/har',
+      templateUrl: 'html/har.html',
     })
 
     .otherwise({
-     redirectTo: '/rec/:trip_id?'
+     redirectTo: 'rec/:trip_id?'
     });
 });
 
@@ -60,5 +58,4 @@ app.config(function ($httpProvider, $provide) {
         };
     });
     $httpProvider.interceptors.push('httpInterceptor');
-
 });

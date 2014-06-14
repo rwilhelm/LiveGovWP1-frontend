@@ -23,7 +23,7 @@ gulp.task('jade', function() {
 
 // compile react components
 gulp.task('react', function() {
-  return gulp.src('./public/js/**/src/')
+  return gulp.src('./public/js/**/src/*.jsx')
     .pipe(plumber({ errorHandler: onError }))
     .pipe(react({
       harmony: true,
