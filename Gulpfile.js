@@ -13,10 +13,11 @@ var onError = function (err) {
 
 // compile react components
 gulp.task('react', function() {
-  return gulp.src('./public/jsx/src')
+  return gulp.src('./public/js/**/src')
     .pipe(plumber({ errorHandler: onError }))
     .pipe(react({
-      harmony: true
+      harmony: true,
+      noCacheDir: true
     }))
     .pipe(gulp.dest('./public/jsx'));
 });
