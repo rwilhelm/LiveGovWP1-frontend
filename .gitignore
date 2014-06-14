@@ -20,4 +20,4 @@ npm-debug.log
 *.log
 
 public/js/components/*.js
-public/js/components/.module-cache
+.module-cache
