@@ -43,7 +43,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
     .container-fluid.charts
       .row
         .col-xs-10.col-lg-11
-          chart.gra(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
+          chart#gra(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
         .col-xs-2.col-lg-1
           h4 Gravity
           div {{ trip.data.sensors.gra.length }}/{{ trip.data.counts.gra }}
@@ -51,7 +51,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
 
       .row
         .col-xs-10.col-lg-11
-          chart.acc(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
+          chart#acc(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
         .col-xs-2.col-lg-1
           h4 Acceleration
           div {{ trip.data.sensors.acc.length }}/{{ trip.data.counts.acc }}
@@ -59,7 +59,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
 
       .row
         .col-xs-10.col-lg-11
-          chart.lac(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
+          chart#lac(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
         .col-xs-2.col-lg-1
           h4 Linear Acceleration
           div {{ trip.data.sensors.lac.length }}/{{ trip.data.counts.lac }}

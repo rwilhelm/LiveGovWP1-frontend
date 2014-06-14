@@ -1,5 +1,5 @@
 /* jshint strict:true, devel:true, debug:true */
-/* globals angular, app, d3, L */
+/* globals angular, app, d3, L, React, chart */
 'use strict'; // jshint -W097
 
 app.directive('minimapPreview', ['$window',
@@ -59,42 +59,74 @@ app.directive('minimap', ['$window',
 ]);
 
 app.directive('chart', [
-  function() {
+  function () {
     return {
       restrict: 'E',
-      scope: {trip: '=', updateExtent: '&', loadMoreData: '&'},
+      scope: { trip: '=', id: '@', updateExtent: '&', loadMoreData: '&' },
       link: function($scope, $element, $attributes) {
 
-        var chart = d3.custom.lineChart();
-        var chartElement = d3.select($element[0]); // chart's 'this' in selection.each
+        $scope.$watchCollection('[trip.data.sensors[$scope.id], trip.domain.x, trip.domain.y, trip.extent]', function(val, oldVal) {
+          if ($scope.trip && $scope.trip.data.sensors[$scope.id].length && $scope.trip.domain.x.length && $scope.trip.domain.y.length) {
 
-        var sensor = $attributes.class; // gra, acc or lac
+            console.log('chart directive: watch success');
 
-        function getWidth() {
-          return $element[0].parentNode.offsetWidth;
-        }
+            // chart.on('brushended', function(d, i) {
+            //   $scope.updateExtent({args: d});
+            //   $scope.loadMoreData({args: d});
+            // });
 
-        chart.on('brushended', function(d, i) {
-          $scope.updateExtent({args: d});
-          $scope.loadMoreData({args: d});
-        });
-
-        // draw the chart as soon as data is ready or if any of it's values change
-        $scope.$watchCollection('[trip.data.sensors[sensor], trip.domain.x, trip.domain.y, trip.extent]', function(val, oldVal) {
-          if ($scope.trip && $scope.trip.data.sensors[sensor].length && $scope.trip.domain.x.length && $scope.trip.domain.y.length) {
-            chartElement
-            .datum({data: $scope.trip.data.sensors[sensor]})
-            .call(chart
-              .xScale($scope.trip.extent.length ? $scope.trip.extent : $scope.trip.domain.x)
-              .yScale($scope.trip.domain.y)
+            React.renderComponent(
+              chart({
+                data: $scope.trip.data.sensors[$scope.id],
+                target: $scope.id,
+                extent: $scope.trip.extent.length ? $scope.trip.extent : $scope.trip.domain.x,
+                yDomain: $scope.trip.domain.y
+              }), $element[0]
             );
           }
         });
-
       }
     };
   }
 ]);
+
+// app.directive('chart', [
+//   function() {
+//     return {
+//       restrict: 'E',
+//       scope: {trip: '=', updateExtent: '&', loadMoreData: '&'},
+//       link: function($scope, $element, $attributes) {
+
+//         var chart = d3.custom.lineChart();
+//         var chartElement = d3.select($element[0]); // chart's 'this' in selection.each
+
+//         var sensor = $attributes.class; // gra, acc or lac
+
+//         function getWidth() {
+//           return $element[0].parentNode.offsetWidth;
+//         }
+
+//         chart.on('brushended', function(d, i) {
+//           $scope.updateExtent({args: d});
+//           $scope.loadMoreData({args: d});
+//         });
+
+//         // draw the chart as soon as data is ready or if any of it's values change
+//         $scope.$watchCollection('[trip.data.sensors[sensor], trip.domain.x, trip.domain.y, trip.extent]', function(val, oldVal) {
+//           if ($scope.trip && $scope.trip.data.sensors[sensor].length && $scope.trip.domain.x.length && $scope.trip.domain.y.length) {
+//             chartElement
+//             .datum({data: $scope.trip.data.sensors[sensor]})
+//             .call(chart
+//               .xScale($scope.trip.extent.length ? $scope.trip.extent : $scope.trip.domain.x)
+//               .yScale($scope.trip.domain.y)
+//             );
+//           }
+//         });
+
+//       }
+//     };
+//   }
+// ]);
 
 app.directive('map', [
   function () {
