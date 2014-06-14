@@ -58,7 +58,7 @@ app.controller('tripCtrl',
       // debugger
     }
 
-    Trip.sensorCounts($scope.trip);
+    // Trip.sensorCounts($scope.trip);
 
   });
 

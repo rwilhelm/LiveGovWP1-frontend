@@ -23,13 +23,13 @@ gulp.task('jade', function() {
 
 // compile react components
 gulp.task('react', function() {
-  return gulp.src('./public/js/**/src')
+  return gulp.src('./public/js/**/src/')
     .pipe(plumber({ errorHandler: onError }))
     .pipe(react({
       harmony: true,
       noCacheDir: true
     }))
-    .pipe(gulp.dest('./public/jsx'));
+    .pipe(gulp.dest('./public/js/'));
 });
 
 // recompile sass files (two short beeps: success, anything else: probably failure)
@@ -41,20 +41,19 @@ gulp.task('sass', function () {
       style: process.env.NODE_ENV === 'development' ? 'expanded' : 'compressed'
     }))
     .pipe(autoprefixer("last 1 version", "> 1%", "ie 8", "ie 7"))
-    .pipe(gulp.dest('public/css'));
+    .pipe(gulp.dest('public/css/'));
 });
 
 // watch stuff for changes
 gulp.task('watch', function () {
-  gulp.watch(['public/css/*.scss'], ['sass']);
-  gulp.watch(['public/jsx/src/*jsx'], ['react']);
+  gulp.watch(['public/css/**/*.scss'], ['sass']);
+  gulp.watch(['public/js/src/**/*.jsx'], ['react']);
   gulp.watch(['public/html/src/**/*.jade'], ['react']);
 });
 
 // start the server using nodemon (so it restarts if neccessary)
 gulp.task('server', function () {
   nodemon({
-    script: 'server.js',
     script: 'app/server.js',
     verbose: true,
     ext: 'html js',
@@ -76,19 +75,15 @@ gulp.task('server', function () {
       '.git/',
       '.gitignore',
       '.npmrc',
-      '.sass-cache/',
       'bower.json',
-      'bower_components/',
       'Gulpfile.js',
-      'karma.conf.js',
       'LICENSE',
       'Makefile',
       'node_modules/',
       'package.json',
       'public/css/*.css',
       'public/css/*.map',
-      'public/jsx/*.js',
-      'public/jsx/.module-cache/',
+      'public/html/*.html',
       'test/',
     ]
   })
@@ -98,7 +93,6 @@ gulp.task('server', function () {
 
 // development mode: compile sass and react files once, then watch them for
 // changes and start the server on port 4001
-gulp.task('default', ['sass', 'react', 'watch', 'server']);
 gulp.task('default', ['sass', 'jade', 'react', 'watch', 'server']);
 
 // same as above, but don't watch anything
