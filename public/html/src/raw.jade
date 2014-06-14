@@ -1,3 +1,34 @@
+//- TODO restructure controllers to get rid of mainCtrl and maybe rename tripCtrl
+//- to mainCtrl
+
+
+div(ng-controller="tripCtrl as ctrl")
+
+  trip-info(data='trip')
+
+  chart(trip='trip', sensor='gra', extent='{{ trip.data.extent }}')
+    chart-info
+
+  chart(trip='trip', sensor='acc', extent='{{ trip.data.extent }}')
+    chart-info
+
+  chart(trip='trip', sensor='lac', extent='{{ trip.data.extent }}')
+    chart-info
+
+  data-table(sensor='gra', trip='trip')
+  data-table(sensor='acc', trip='trip')
+  data-table(sensor='lac', trip='trip')
+  data-table(sensor='har', trip='trip')
+  data-table(sensor='gps', trip='trip')
+  data-table(sensor='geo', trip='trip')
+
+  minimap(trip='trip', extent='{{ trip.data.extent }}')
+
+
+
+
+
+
 div(ng-controller="tripCtrl as ctrl")#raw
   p {{ trip.extent }}
 

@@ -12,7 +12,6 @@ var schemas = {
   'gra': 'sensor_gravity'
 };
 
-
 module.exports = function(api) {
   api
     .get('trips', '/trips/:trip_id?', trips)

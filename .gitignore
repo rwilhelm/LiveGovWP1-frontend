@@ -21,3 +21,5 @@ npm-debug.log
 
 public/js/components/*.js
 .module-cache
+public/js/reusable/*.js
+public/html/*.html

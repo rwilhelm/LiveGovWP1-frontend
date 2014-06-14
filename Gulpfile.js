@@ -4,12 +4,22 @@ var sass = require('gulp-ruby-sass'); // "better" than gulp-sass
 var nodemon = require('gulp-nodemon');
 var plumber = require('gulp-plumber'); // error handling
 var autoprefixer = require('gulp-autoprefixer');
+var jade = require('gulp-jade');
 var react = require('gulp-react');
 
 var onError = function (err) {
   gutil.beep();
   console.log(err);
 };
+
+gulp.task('jade', function() {
+  return gulp.src('./public/html/src/**/*.jade')
+    .pipe(plumber({ errorHandler: onError }))
+    .pipe(jade({
+      pretty: true
+    }))
+    .pipe(gulp.dest('./public/html/'));
+});
 
 // compile react components
 gulp.task('react', function() {
@@ -38,12 +48,14 @@ gulp.task('sass', function () {
 gulp.task('watch', function () {
   gulp.watch(['public/css/*.scss'], ['sass']);
   gulp.watch(['public/jsx/src/*jsx'], ['react']);
+  gulp.watch(['public/html/src/**/*.jade'], ['react']);
 });
 
 // start the server using nodemon (so it restarts if neccessary)
 gulp.task('server', function () {
   nodemon({
     script: 'server.js',
+    script: 'app/server.js',
     verbose: true,
     ext: 'html js',
     nodeArgs: ['--harmony'],
@@ -56,6 +68,10 @@ gulp.task('server', function () {
       '*.log',
       '*.map',
       '*.md',
+      '*/.module-cache/',
+      '*/.sass-cache/',
+      '*/bower_components/',
+      '.bowerrc',
       '.DS_Store',
       '.git/',
       '.gitignore',
@@ -83,6 +99,7 @@ gulp.task('server', function () {
 // development mode: compile sass and react files once, then watch them for
 // changes and start the server on port 4001
 gulp.task('default', ['sass', 'react', 'watch', 'server']);
+gulp.task('default', ['sass', 'jade', 'react', 'watch', 'server']);
 
 // same as above, but don't watch anything
 gulp.task('production', ['sass', 'react', 'server']);

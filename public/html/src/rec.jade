@@ -30,8 +30,8 @@ div(ng-controller="tripCtrl as ctrl")
           tr(ng-repeat="trip in trips | orderBy:predicate:reverse", ng-class='{selected:ctrl.selected(trip)}', ng-hide="(hasData && !ctrl.hasData(trip)) || (hasDuration && !ctrl.hasDuration(trip)) || (hasLove && !ctrl.hasLove(trip)) || (hasName && !ctrl.hasName(trip))")
             td(ng-click="ctrl.select(trip); ctrl.to('raw', trip)", ng-class='{hasData:ctrl.hasData(trip)}', title='data amount: {{ctrl.hasData(trip)}}') {{ trip.id }}
             td(ng-click="ctrl.select(trip); ctrl.to('raw', trip)") {{ trip.user }}
-            td(ng-click="ctrl.select(trip); ctrl.to('raw', trip)") {{ trip.start | date:'yyyy-MM-dd HH:mm:ss' }}
-            td(ng-click="ctrl.select(trip); ctrl.to('raw', trip)") {{ trip.duration | date:'HH:mm:ss' }}
+            td(ng-click="ctrl.select(trip); ctrl.to('raw', trip)") {{ trip.time.start | date:'yyyy-MM-dd HH:mm:ss' }}
+            td(ng-click="ctrl.select(trip); ctrl.to('raw', trip)") {{ trip.time.duration | date:'HH:mm:ss' }}
             td.minimap-preview
               div.minimap-preview
                 minimap-preview(domain='trip.domain', har='trip.data.har')
