@@ -43,51 +43,7 @@ app.service('Trip',
     // data and prepare it first.
 
     loadTrips: function() {
-      var deferred = $q.defer();
-
-      if (trips.length) {
-        deferred.resolve(trips);
-      } else {
-
-        // do the xhr request on 'trips' to get the trip list and immediately
-        // return a promise on the to be received and prepared data. see
-        // this.query() in the record controller (recCtrl).
-
-        console.log('loading trip list');
-
-        $http.get('api/trips')
-        .success(function(data, status, headers, config) {
-
-          // set up trip object architecture
-          trips = data.map(function(d) {
-            d = {
-              name: d.name,
-              id: d.trip_id,
-              user: d.user_id.replace(/['"]+/g, ''),
-              start: +d.start_ts,
-              stop: +d.stop_ts,
-              duration: +d.stop_ts - (+d.start_ts) - 3600000, // minus one hour due to wrong timestamps in db
-              extent: [],
-              domain: { x: [], y: [] },
-              data: { counts: {}, sensors: {}, geo: [], har: [] }, // feature collection
-              love: false
-            };
-
-            // create empty sensor objects
-            Config.sensors().map(function (sensor) { d.data.sensors[sensor] = []; });
-
-            return d;
-          });
-
-          deferred.resolve(trips);
-        })
-        .error(function(data, status, headers, config) {
-          console.error("Could not load trips!");
-          deferred.reject();
-        });
-      }
-
-      return deferred.promise;
+      return Data.trips(trips);
     },
 
     // select a trip and call data factory
@@ -180,33 +136,6 @@ app.service('Trip',
       return (trip.duration >= -3600000 && trip.duration <= -3500000) ? false : true;
     },
 
-    sensorCounts: function(trip) {
-      var promises = Config.sensors().map(function(sensor) {
-        var deferred = $q.defer();
-
-        $http({
-          method: "GET",
-          url: 'api/trips/' + trip.id + '/sensors/' + sensor + '/count',
-        })
-        .success(function (data, status, headers, config) {
-          trip.data.counts[sensor] = +data[0].count;
-
-        // defer merged data
-        deferred.resolve(trip.data.counts[sensor]);
-
-        })
-        .error(function (data, status, headers, config) {
-          deferred.reject();
-        });
-
-        // return merged data as promise
-        return deferred.promise;
-
-
-      });
-
-    },
-
     hasLove: function(trip) {
       if (!arguments.length || !trip) return;
       return (trip.love ? true : false);
@@ -257,9 +186,66 @@ app.service('Trip',
   };
 }]);
 
-// data factory is called by trip service only
+// data factory: xhr action! called by trip service only
 app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
   return {
+
+    trips: function(trips) {
+      var deferred = $q.defer();
+
+      if (trips.length) {
+        deferred.resolve(trips);
+      } else {
+
+        // do the xhr request on 'trips' to get the trip list and immediately
+        // return a promise on the to be received and prepared data. see
+        // this.query() in the record controller (recCtrl).
+
+        console.log('loading trip list');
+
+        $http.get('api/trips')
+        .success(function(data, status, headers, config) {
+
+          // set up trip object architecture
+          trips = data.map(function(d) {
+            var trip = {
+              id: d.trip_id,
+              name: d.name,
+              user: d.user_id.replace(/['"]+/g, ''), // TODO write helper to detox strings
+              time: {
+                start: +d.start_ts,
+                stop: +d.stop_ts,
+                duration: +d.stop_ts - (+d.start_ts) - 3600000, // FIXME -1h wrong ts in db
+              },
+              data: {
+                gps: [],
+                har: [],
+                counts: {},
+                extent: [],
+                sensors: {},
+                domain: { x: [], y: [] },
+                geo: [], // feature collection (gps + har)
+              },
+              love: false // TODO use local storage
+            };
+
+            // create empty sensor objects
+            Config.sensors().map(function (sensor) { trip.data.sensors[sensor] = []; });
+
+            return trip;
+          });
+
+          deferred.resolve(trips);
+        })
+        .error(function(data, status, headers, config) {
+          console.error("Could not load trips!");
+          deferred.reject();
+        });
+      }
+
+      return deferred.promise;
+    },
+
     // load sensor data
     sensor: function (trip, obj) {
       var t = new Date();
@@ -418,6 +404,31 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
         deferred.resolve(fc);
       });
       return deferred.promise;
+    },
+
+    sensorCounts: function(trip) {
+      var promises = Config.sensors().map(function(sensor) {
+        var deferred = $q.defer();
+
+        $http({
+          method: "GET",
+          url: 'api/trips/' + trip.id + '/sensors/' + sensor + '/count',
+        })
+        .success(function (data, status, headers, config) {
+          trip.data.counts[sensor] = +data[0].count;
+
+        // defer merged data
+        deferred.resolve(trip.data.counts[sensor]);
+
+        })
+        .error(function (data, status, headers, config) {
+          deferred.reject();
+        });
+
+        // return merged data as promise
+        return deferred.promise;
+
+      });
     }
-  }
+  };
 }]);
