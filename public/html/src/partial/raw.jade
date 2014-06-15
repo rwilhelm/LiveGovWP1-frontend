@@ -152,7 +152,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
                   th tag
 
                   tbody
-                    tr(ng-repeat="d in trip.data.sensors.lac", ng-class='d.tag | detox', ng-hide='!ctrl.matchExtent(d)')
+                    tr(ng-repeat="d in trip.data.sensors.lac", ng-class='d.tag | detox', ng-hide='ctrl.matchExtent(d)')
                       td.x {{ d.x | number:15 }}
                       td.y {{ d.y | number:15 }}
                       td.z {{ d.z | number:15 }}
