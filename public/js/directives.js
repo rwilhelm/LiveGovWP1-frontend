@@ -65,22 +65,28 @@ app.directive('chart', [
       scope: { trip: '=', id: '@', updateExtent: '&', loadMoreData: '&' },
       link: function($scope, $element, $attributes) {
 
-        $scope.$watchCollection('[trip.data.sensors[$scope.id], trip.domain.x, trip.domain.y, trip.extent]', function(val, oldVal) {
-          if ($scope.trip && $scope.trip.data.sensors[$scope.id].length && $scope.trip.domain.x.length && $scope.trip.domain.y.length) {
+        console.log('initializing chart directive:', $scope.id);
 
-            console.log('chart directive: watch success');
+        // chart.on('brushended', function(d, i) {
+        //   $scope.updateExtent({args: d});
+        //   $scope.loadMoreData({args: d});
+        // });
 
-            // chart.on('brushended', function(d, i) {
-            //   $scope.updateExtent({args: d});
-            //   $scope.loadMoreData({args: d});
-            // });
+        $scope.$watchCollection('[trip.data.sensors[id], trip.data.domain.x, trip.data.domain.y]', function(val, oldVal) {
+          if ($scope.trip && val.every(function(v) { return v.length !== 0; })) {
+            var data       = $scope.trip.data;
+            var id         = $scope.id;
+            var sensorData = data.sensors[id];
+            var yDomain    = data.domain.y;
+            var xDomain    = data.domain.x;
+            var extent     = data.extent;
 
             React.renderComponent(
               chart({
-                data: $scope.trip.data.sensors[$scope.id],
-                target: $scope.id,
-                extent: $scope.trip.extent.length ? $scope.trip.extent : $scope.trip.domain.x,
-                yDomain: $scope.trip.domain.y
+                target: id,
+                data: sensorData,
+                extent: extent.length ? extent : xDomain,
+                yDomain: yDomain
               }), $element[0]
             );
           }
