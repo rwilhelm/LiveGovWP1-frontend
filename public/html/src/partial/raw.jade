@@ -1,28 +1,27 @@
 //- TODO restructure controllers to get rid of mainCtrl and maybe rename tripCtrl
 //- to mainCtrl
 
+//- div(ng-controller="tripCtrl as ctrl")
 
-div(ng-controller="tripCtrl as ctrl")
+//-   trip-info(data='trip')
 
-  trip-info(data='trip')
+//-   chart(trip='trip', sensor='gra', extent='{{ trip.data.extent }}')
+//-     chart-info
 
-  chart(trip='trip', sensor='gra', extent='{{ trip.data.extent }}')
-    chart-info
+//-   chart(trip='trip', sensor='acc', extent='{{ trip.data.extent }}')
+//-     chart-info
 
-  chart(trip='trip', sensor='acc', extent='{{ trip.data.extent }}')
-    chart-info
+//-   chart(trip='trip', sensor='lac', extent='{{ trip.data.extent }}')
+//-     chart-info
 
-  chart(trip='trip', sensor='lac', extent='{{ trip.data.extent }}')
-    chart-info
+//-   data-table(sensor='gra', trip='trip')
+//-   data-table(sensor='acc', trip='trip')
+//-   data-table(sensor='lac', trip='trip')
+//-   data-table(sensor='har', trip='trip')
+//-   data-table(sensor='gps', trip='trip')
+//-   data-table(sensor='geo', trip='trip')
 
-  data-table(sensor='gra', trip='trip')
-  data-table(sensor='acc', trip='trip')
-  data-table(sensor='lac', trip='trip')
-  data-table(sensor='har', trip='trip')
-  data-table(sensor='gps', trip='trip')
-  data-table(sensor='geo', trip='trip')
-
-  minimap(trip='trip', extent='{{ trip.data.extent }}')
+//-   minimap(trip='trip', extent='{{ trip.data.extent }}')
 
 
 
@@ -77,7 +76,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
           chart#gra(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
         .col-xs-2.col-lg-1
           h4 Gravity
-          div {{ trip.data.sensors.gra.length }}/{{ trip.data.counts.gra }}
+          div {{ trip.data.sensors.gra.length }}/{{ trip.data.count.gra }}
           a(ng-href="./trips/{{trip.id}}/gra.csv", download='livegov-trip-{{trip.id}}-sensor-gra.csv') export
 
       .row
@@ -85,7 +84,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
           chart#acc(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
         .col-xs-2.col-lg-1
           h4 Acceleration
-          div {{ trip.data.sensors.acc.length }}/{{ trip.data.counts.acc }}
+          div {{ trip.data.sensors.acc.length }}/{{ trip.data.count.acc }}
           a(ng-href="./trips/{{trip.id}}/acc.csv", download='livegov-trip-{{trip.id}}-sensor-acc.csv') export
 
       .row
@@ -93,7 +92,7 @@ div(ng-controller="tripCtrl as ctrl")#raw
           chart#lac(trip="trip", update-Extent="updateExtent(args)", load-More-Data="loadMoreData(args)")
         .col-xs-2.col-lg-1
           h4 Linear Acceleration
-          div {{ trip.data.sensors.lac.length }}/{{ trip.data.counts.lac }}
+          div {{ trip.data.sensors.lac.length }}/{{ trip.data.count.lac }}
           a(ng-href="./trips/{{trip.id}}/lac.csv", download='livegov-trip-{{trip.id}}-sensor-lac.csv') export
 
     .container-fluid.data-tables

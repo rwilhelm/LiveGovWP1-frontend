@@ -44,23 +44,19 @@ module.exports = function(api) {
     var extent = this.query.e ? extentToSQL(this.query.e) : '';
     var result, q;
 
-    console.log(this.params.sensor);
     switch (this.params.sensor) {
       case 'gps':
-        console.log('gps');
         q = 'SELECT ts, ST_AsGeoJSON(lonlat)::json AS lonlat FROM ' + schemas[this.params.sensor] + ' WHERE trip_id = ' + this.params.trip_id + extent;
         break;
       case 'lac':
       case 'acc':
       case 'gra':
         if (this.query.w) { // query window size
-          console.log('sensor');
           q = 'SELECT avg(x) AS x, avg(y) AS y, avg(z) AS z, min(ts) AS starttime, max(ts) AS endtime FROM (SELECT x, y, z, ts, NTILE(' + this.query.w + ') OVER (ORDER BY ts) AS w FROM ' + schemas[this.params.sensor] + ' WHERE trip_id = ' + this.params.trip_id + extent + ') A GROUP BY w ORDER BY w';
           break;
         }
         /* falls through */
       default:
-        console.log('default');
         q = 'SELECT * FROM ' + schemas[this.params.sensor] + ' WHERE trip_id = ' + this.params.trip_id + extent;
     }
 
