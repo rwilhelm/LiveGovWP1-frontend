@@ -39,6 +39,7 @@ app.controller('mainCtrl', ['$scope', '$rootScope', '$route', function($scope, $
 }]);
 
 app.controller('tripCtrl',
+  ['$scope', '$location', '$route', '$routeParams', '$q', 'Config', 'Trip',
   function($scope, $location, $route, $routeParams, $q, Config, Trip) {
 
   console.log('loading tripCtrl');
@@ -191,7 +192,7 @@ app.controller('tripCtrl',
   this.matchExtent = function(d) {
     return (d.ts >= $scope.trip.extent[0] && d.ts <= $scope.trip.extent[1]) ? true : false;
   };
-});
+}]);
 
 app.controller('navCtrl', function ($route, $scope, $routeParams, Trip) {
   console.log('loading navCtrl');
