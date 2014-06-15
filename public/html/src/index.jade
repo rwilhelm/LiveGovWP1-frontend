@@ -13,50 +13,51 @@ html(lang="en", ng-app="inspectionFrontEnd")
     //- to ensure css files are downloaded in parallel, include external css
     //- before external javascript
 
-    //- link(href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css', rel='stylesheet')
-    link(rel="stylesheet", href='../bower_components/mapbox.js/theme/style.css')
-    link(rel="stylesheet", href="../bower_components/bootstrap/dist/css/bootstrap.min.css")
-    link(rel="stylesheet", href="../css/index.css")
+    link(href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css', rel='stylesheet')
+    link(rel="stylesheet", href='./bower_components/mapbox.js/theme/style.css')
+    link(rel="stylesheet", href="./bower_components/bootstrap/dist/css/bootstrap.min.css")
+    link(rel="stylesheet", href="css/index.css")
 
-    script(src="../bower_components/angular/angular.js")
+    script(src="./bower_components/angular/angular.js")
 
   body(ng-controller="mainCtrl as main")
     header
       div(ng-include src="'partial/navbar'")
-  
+
     #container
       div(ng-include src="template")
 
-  script(src="../bower_components/angular-resource/angular-resource.js")
-  script(src="../bower_components/angular-route/angular-route.js")
-  script(src="../bower_components/d3/d3.js")
-  script(src="../bower_components/d3-tip/index.js")
-  script(src="../bower_components/jquery/dist/jquery.js")
-  script(src="../bower_components/moment/min/moment.min.js")
-  script(src="../bower_components/underscore/underscore-min.js")
-  script(src="../bower_components/react/react-with-addons.js")
-  //- script(src="../bower_components/react/JSXTransformer.js")
-  script(src="../bower_components/ngReact/ngReact.js")
+  script(src="./bower_components/angular-resource/angular-resource.js")
+  script(src="./bower_components/angular-route/angular-route.js")
+  //- script(src="./bower_components/mapbox.js/mapbox.js")
+  script(src="./bower_components/d3/d3.js")
+  script(src="./bower_components/d3-tip/index.js")
+  script(src="./bower_components/jquery/dist/jquery.js")
+  script(src="./bower_components/moment/min/moment.min.js")
+  script(src="./bower_components/underscore/underscore-min.js")
+  script(src="./bower_components/react/react-with-addons.js")
+  script(src="./bower_components/ngReact/ngReact.js")
   script(src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js')
-  //- script(src='../bower_components/mapbox.js/mapbox.js')
+  //- script(src="./bower_components/react/JSXTransformer.js")
+  //- script(src='./bower_components/mapbox.js/mapbox.js')
 
   //- custom js prototypes
-  script(src="../js/helpers.js")
+  script(src="js/helpers.js")
 
   //- d3 chart, minimap
-  script(src="../js/reusable/chart.js")
-  script(src="../js/reusable/minimap.js")
-  script(src="../js/reusable/minimap-preview.js")
+  script(src="js/reusable/chart.js")
+  script(src="js/reusable/minimap.js")
+  script(src="js/reusable/minimap-preview.js")
   //- TODO rewrite map as reusable component
   //- TODO make minimap configurable
-  //- script(src="../js/reusable/map.js")
+  //- script(src="js/reusable/map.js")
 
   //- angular
-  script(src="../js/modules.js")
-  script(src="../js/routes.js")
-  script(src="../js/filters.js")
-  script(src="../js/services.js")
-  script(src="../js/controllers.js")
-  script(src="../js/directives.js")
+  script(src="js/modules.js")
+  script(src="js/routes.js")
+  script(src="js/filters.js")
+  script(src="js/services.js")
+  script(src="js/controllers.js")
+  script(src="js/directives.js")
 
 //- ex:ft=jade
