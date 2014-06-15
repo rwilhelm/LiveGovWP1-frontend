@@ -41,12 +41,11 @@ app.controller('mainCtrl', ['$scope', '$rootScope', '$route', function($scope, $
 app.controller('tripCtrl',
   ['$scope', '$location', '$route', '$routeParams', '$q', 'Config', 'Trip',
   function($scope, $location, $route, $routeParams, $q, Config, Trip) {
-
   console.log('loading tripCtrl');
 
   Trip.loadTrips().then(function(data) {
     $scope.trips = data;
-
+    console.log("loading trips from database");
 
     if ($routeParams.trip_id) {
       console.log('trip id is set by route params to', $routeParams.trip_id);
@@ -56,11 +55,7 @@ app.controller('tripCtrl',
       Trip.select($scope.trip);
     } else {
       $scope.trip = Trip.selected();
-      // debugger
     }
-
-    // Trip.sensorCounts($scope.trip);
-
   });
 
   // update a trip
@@ -78,22 +73,19 @@ app.controller('tripCtrl',
     }
   };
 
+  // TODO -> helper?
   this.updateUrl = function(trip) {
-    var c = $location.path().split('/');
-    var i = c.indexOf($routeParams.trip_id);
-
+    var path = $location.path().split('/');
+    var tripIdx = path.indexOf($routeParams.trip_id);
     if (!arguments.length) {
-      c.pop();
-    } else if (i == -1) {
-      c.push(trip.id);
-    } else {
-      c[i] = trip.id;
-    }
-
-    $location.url(c.join('/')).replace();
+      path.pop(); // removes last element -> selects no trip
+    } else if (tripIdx === -1) { // trip
+      path.push(trip.id); // append -> selects trip
+    } // else trip_id (url param) matches trip.id (selected trip)
+    $location.url(path.join('/')).replace();
   };
 
-  // select a trip
+  // select trip
   this.select = function(trip) {
     if (!arguments.length) {
       this.updateUrl();
@@ -104,54 +96,55 @@ app.controller('tripCtrl',
     }
   };
 
-  this.sensorCounts = function(trip) {
-    Trip.sensorCounts();
-  };
-
-  // test if a trip is selected
-  this.selected = function(trip) {
-    return Trip.selected(trip);
-  };
-
-  // test if trip data is loaded
-  this.hasData = function(trip) {
-    return Trip.hasData(trip);
-  };
-
-  this.hasDuration = function(trip) {
-    return Trip.hasDuration(trip);
-  };
-
-  this.hasName = function(trip) {
-    return Trip.hasName(trip);
-  };
-
-  this.hasLove = function(trip) {
-    return Trip.hasLove(trip);
-  };
-
-  this.toggleLove = function(trip) {
-    return Trip.toggleLove(trip);
-  };
-
-  // reset loaded trip data
-  this.reset = function(trip) {
-    // debugger
-    console.log('reset -> trip.extent', trip.extent);
-    return Trip.reset(trip);
-  };
-
   // load (more) data for a trip
-  // obj is optional: { extent: Array[2], windowSize: number }
+  // opt arg: { extent: Array[2], windowSize: number } // TODO test if correct -> ?e=?945i324, ?=e1235123
   this.loadData = function(trip, obj) {
     Trip.loadData(trip, obj);
   };
 
-  /* ... */
+  // reset loaded trip data
+  this.reset = function(trip) {
+    return Trip.reset(trip);
+  };
+
+  // test if trip is selected
+  this.selected = function(trip) {
+    return Trip.selected(trip);
+  };
+
+  // count sensor data points
+  this.count = function(trip) {
+    Trip.count(trip);
+  };
+
+  // test if data is loaded
+  this.hasData = function(trip) {
+    return Trip.hasData(trip);
+  };
+
+  // test if ts1 > ts0
+  this.hasDuration = function(trip) {
+    return Trip.hasDuration(trip);
+  };
+
+  // test if name is set
+  this.hasName = function(trip) {
+    return Trip.hasName(trip);
+  };
+
+  // test if "bookmarked"
+  this.hasLove = function(trip) {
+    return Trip.hasLove(trip);
+  };
+
+  // toggle bookmark flag
+  this.toggleLove = function(trip) {
+    return Trip.toggleLove(trip);
+  };
 
   // change location path
   this.to = function(loc, trip) {
-    console.log(loc);
+    console.log('this.to: location.path set to: ', loc + "/" + trip.id);
     $location.path(loc + "/" + trip.id);
   };
 
@@ -190,7 +183,7 @@ app.controller('tripCtrl',
   };
 
   this.matchExtent = function(d) {
-    return (d.ts >= $scope.trip.extent[0] && d.ts <= $scope.trip.extent[1]) ? true : false;
+    return (d.ts >= $scope.trip.data.extent[0] && d.ts <= $scope.trip.data.extent[1]) ? true : false;
   };
 }]);
 

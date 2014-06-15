@@ -16,179 +16,14 @@ app.service('Config', function() {
   };
 });
 
-/*
-    DIRECTIVES <-> CONTROLLER <-> TRIP SERVICE <-> DATA FACTORY
- */
-
-// Trip.loadTrips():
-// 1. load trip data and populate the trip table view ('/rec')
-
-// Trip.select():
-// 2. user selects a trip
-
-// Trip.loadData():
-// 3. load sensor data for that trip
-
-app.service('Trip',
-  ['$http', '$q', 'Config', 'Data', function($http, $q, Config, Data) {
-
-  var trips = []; // all data is stored in here
-  var selectedTrip; // a copy(?) of the currently selected trip object
-
-  return {
-
-    // called unconditionally by the record controller. returns a promise on
-    // the trip object. if it's already populated, just resolve the promise
-    // with it, else send an xhr request to our api, (hopefully) receive the
-    // data and prepare it first.
-
-    loadTrips: function() {
-      return Data.trips(trips);
-    },
-
-    // select a trip and call data factory
-    select: function(trip) {
-      // call w/o args to clear trip selection TODO
-      if (!arguments.length) {
-        selectedTrip = undefined;
-        return;
-      }
-
-      selectedTrip = trip;
-
-      // load trip data if neccessary
-      if (!this.hasData(trip)) this.loadData(trip);
-
-      return trip;
-    },
-
-    // load (more) data for a trip
-    // obj is optional: { extent: Array[2], windowSize: number }
-    loadData: function(trip, obj) {
-      var that = this;
-      var t = new Date();
-      // console.info(trip.id + ": loading data");
-
-      // if (obj) {
-      //   console.log(obj);
-      //   debugger
-      // }
-
-
-      // debugger
-
-      // load sensor data. calls Data.sensor() for every sensor given in
-      // Config.sensors(). when all sensor data has arrived, update the trips
-      // x and y domain (which is the min and max timestamp for the x-axis and
-      // min and max sensor data for the y-axis. see Config.xDomain() and
-      // Config.yDomain())
-
-      Data.har(trip).then(function(harData) {
-        trip.data.har = harData.summarize('tag'); // -> see helpers
-
-        Data.geo(trip).then(function(data) {}); // TODO do only when neccessary
-
-        Data.sensor(trip, obj).then(function(data) {
-
-          data.forEach(function(sensor) {
-            sensor.forEach(function(c, i, a) {
-              c.tag = trip.data.har.filter(function(d) {
-                if (c.ts >= +d[0] && c.ts <= +d[1]) {
-                  // console.log(c.ts, +d[0], +d[1], d[2]);
-                }
-                return c.ts >= +d[0] && c.ts <= +d[1];
-              }).map(function(d) { return d[2]; })[0]; // argh
-            });
-          });
-
-          // debugger
-
-          trip.domain.x = data.extent(Config.xDomain());
-          trip.domain.y = data.extent(Config.yDomain());
-          console.info(trip.id + ": done (" + ((new Date() - t) / 1000) + " ms, " + that.hasData(trip) + ")", trip);
-        });
-      });
-    },
-
-    // test if a trip is selected
-    selected: function(trip) {
-      if (!arguments.length) {
-        return selectedTrip ? selectedTrip : false;
-      }
-      return trip === selectedTrip;
-    },
-
-    // test if trip data is loaded
-    hasData: function(trip) {
-      if (!arguments.length) return;
-      return Config.sensors()
-        .map(function (d) { return trip.data.sensors[d].length; })
-        .reduce(function (a, b) { return a + b; });
-    },
-
-    hasName: function(trip) {
-      if (!arguments.length || !trip) return;
-      return (trip.name ? true : false);
-    },
-
-    hasDuration: function(trip) {
-      if (!arguments.length) return;
-      return (trip.duration >= -3600000 && trip.duration <= -3500000) ? false : true;
-    },
-
-    hasLove: function(trip) {
-      if (!arguments.length || !trip) return;
-      return (trip.love ? true : false);
-    },
-
-    toggleLove: function(trip) {
-      if (!arguments.length) return;
-      return trip.love = (trip.love ? false : true);
-    },
-
-    reset: function (trip) {
-      // empty sensor arrays
-      Config.sensors().map(function (sensor) { trip.data.sensors[sensor] = []; });
-      // clear extent
-      trip.extent = [];
-      // load data
-      this.loadData(trip);
-    },
-
-    // update a trip's name FIXME abstract for all fields
-    update: function (trip, data) {
-      trip.name = data.name; // client side update
-
-      $http({ method: 'POST', url: 'api/trips/' + trip.id, data: data })
-      .success(function(data, status, headers, config) {
-        console.info("trip updated:", trip.id);
-      })
-      .error(function(data, status, headers, config) {});
-    },
-
-    // delete a trip
-    delete: function (trip) {
-      trips.splice(trips.indexOf(trip), 1); // client side removal
-
-      $http({ method: 'DELETE', url: 'api/trips/' + trip.id })
-      .success(function(data, status, headers, config) {
-        console.info("trip deleted:", trip.id);
-      })
-      .error(function(data, status, headers, config) {});
-    },
-
-    download: function (trip, sensor, format) {
-      $http({ method: 'GET', url: 'api/trips/' + trip.id + '/sensors/' + sensor + '.' + format })
-      .success(function(data, status, headers, config) {
-
-      });
-    }
-  };
-}]);
 
 // data factory: xhr action! called by trip service only
-app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
+app.factory('Data',
+  ['$http', '$q', 'Config', function ($http, $q, Config) {
   return {
+
+    // functional, stateless
+    // function must return promise
 
     trips: function(trips) {
       var deferred = $q.defer();
@@ -206,7 +41,8 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
         $http.get('api/trips')
         .success(function(data, status, headers, config) {
 
-          // set up trip object architecture
+          // set up trip object architecture (very fragile! change something
+          // here and it'll break all over the place. fixable? FIXME)
           trips = data.map(function(d) {
             var trip = {
               id: d.trip_id,
@@ -220,7 +56,7 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
               data: {
                 gps: [],
                 har: [],
-                counts: {},
+                count: {},
                 extent: [],
                 sensors: {},
                 domain: { x: [], y: [] },
@@ -294,10 +130,13 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
         var harTags = data.map(function(d) {
           return {
             ts: d.ts,
-            tag: d.tag.replace(/[\'\"]+/g, '')
+            tag: d.tag.replace(/[\'\"]+/g, '') // TODO write detox helper
           };
         });
         deferred.resolve(harTags);
+      })
+      .error(function (data, status, headers, config) {
+        deferred.reject();
       });
       return deferred.promise;
     },
@@ -308,7 +147,7 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
     // load har and gps data, return feature collection
     geo: function(trip) {
 
-      // FIXME -> HELPERS
+      // TODO -> helpers
       function calculateDistance(a, b) {
         return gju.pointDistance({
           type: 'Point',
@@ -319,7 +158,7 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
         });
       }
 
-      // FIXME -> HELPERS
+      // TODO -> helpers
       // get array element which occures the most
       function getMaxOccurrence(array) {
         if (!array.length) return null;
@@ -339,7 +178,7 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
         return maxEl;
       }
 
-      // FIXME -> HELPERS
+      // TODO -> helpers
       function topActivity(har, t0, t1) {
         return getMaxOccurrence(har.map(function (d) {
           if (d.ts >= t0 && d.ts <= t1) { // get tags between t0 and t1
@@ -406,29 +245,202 @@ app.factory('Data', ['$http', '$q', 'Config', function ($http, $q, Config) {
       return deferred.promise;
     },
 
-    sensorCounts: function(trip) {
-      var promises = Config.sensors().map(function(sensor) {
+    count: function(trip) {
+      // var promises = Config.sensors().map(function(sensor) {
         var deferred = $q.defer();
-
-        $http({
-          method: "GET",
-          url: 'api/trips/' + trip.id + '/sensors/' + sensor + '/count',
-        })
+        $http.get('api/trips/' + trip.id + '/sensors/' + sensor + '/count')
         .success(function (data, status, headers, config) {
-          trip.data.counts[sensor] = +data[0].count;
-
-        // defer merged data
-        deferred.resolve(trip.data.counts[sensor]);
-
+          deferred.resolve(trip.data.count[sensor]);
         })
         .error(function (data, status, headers, config) {
           deferred.reject();
         });
+        return deferred.promise; // -> then, catch, finally
+      // });
+    }
+  };
+}]);
 
-        // return merged data as promise
-        return deferred.promise;
 
+
+/*
+    DIRECTIVES <-> CONTROLLER <-> TRIP SERVICE <-> DATA FACTORY
+ */
+// Trip.loadTrips():
+// 1. load trip data and populate the trip table view ('/rec')
+
+// Trip.select():
+// 2. user selects a trip
+
+// Trip.loadData():
+// 3. load sensor data for that trip
+
+app.service('Trip',
+  ['$http', '$q', 'Config', 'Data', function($http, $q, Config, Data) {
+
+  var trips = []; // all data is stored in here
+  var selectedTrip; // a copy(?) of the currently selected trip object
+
+  return {
+
+    // called unconditionally by the record controller. returns a promise on
+    // the trip object. if it's already populated, just resolve the promise
+    // with it, else send an xhr request to our api, (hopefully) receive the
+    // data and prepare it first.
+
+    loadTrips: function() {
+      return Data.trips(trips); // incoming promise -> controller
+    },
+
+    // select trip and call data factory
+    // call w/o args to select no trip
+    select: function(trip) {
+      if (!arguments.length) {
+        selectedTrip = undefined;
+        console.log('unselected all trips');
+        return;
+      }
+
+      // load trip data if there is none
+      if (!this.hasData(trip))
+        this.loadData(trip);
+
+      selectedTrip = trip;
+      console.log('selected trip', trip.id);
+      return selectedTrip;
+    },
+
+    // load (more) data for a trip
+    // obj is optional: { extent: Array[2], windowSize: number }
+    loadData: function(trip, obj) {
+      var that = this;
+      var t = new Date();
+      // console.info(trip.id + ": loading data");
+
+      // step 1 (async)
+      // xhr: load sensor data for Config.sensors()
+      // xhr: load gps data
+      // xhr: load har data
+      // xhr: load sensor data count
+
+      // step 2 (after step 1 has finished)
+      // create feature collection ()
+      // calculate x- and y-domain
+
+      // load sensor data. calls Data.sensor() for every sensor given in
+      // Config.sensors(). when all sensor data has arrived, update the trips
+      // x and y domain (which is the min and max timestamp for the x-axis and
+      // min and max sensor data for the y-axis. see Config.xDomain() and
+      // Config.yDomain())
+
+      Data.har(trip).then(function(harData) {
+        trip.data.har = harData.summarize('tag'); // -> see helpers
+
+        Data.geo(trip).then(function(data) {}); // TODO do only when neccessary
+
+        Data.sensor(trip, obj).then(function(data) {
+
+          data.forEach(function(sensor) {
+            sensor.forEach(function(c, i, a) {
+              c.tag = trip.data.har.filter(function(d) {
+                if (c.ts >= +d[0] && c.ts <= +d[1]) {
+                  // console.log(c.ts, +d[0], +d[1], d[2]);
+                }
+                return c.ts >= +d[0] && c.ts <= +d[1];
+              }).map(function(d) { return d[2]; })[0]; // argh
+            });
+          });
+
+          // debugger
+
+          trip.data.domain.x = data.extent(Config.xDomain());
+          trip.data.domain.y = data.extent(Config.yDomain());
+          console.info(trip.id + ": done (" + ((new Date() - t) / 1000) + " ms, " + that.hasData(trip) + ")", trip);
+        });
+      });
+    },
+
+    // test if a trip is selected
+    selected: function(trip) {
+      if (!arguments.length) {
+        return selectedTrip ? selectedTrip : false;
+      }
+      return trip === selectedTrip;
+    },
+
+    // test if trip data is loaded
+    hasData: function(trip) {
+      if (!arguments.length) return;
+      return Config.sensors()
+        .map(function (d) { return trip.data.sensors[d].length; })
+        .reduce(function (a, b) { return a + b; });
+    },
+
+    hasName: function(trip) {
+      if (!arguments.length || !trip) return;
+      return (trip.name ? true : false);
+    },
+
+    hasDuration: function(trip) {
+      if (!arguments.length) return;
+      return (trip.duration >= -3600000 && trip.duration <= -3500000) ? false : true;
+    },
+
+    hasLove: function(trip) {
+      if (!arguments.length || !trip) return;
+      return (trip.love ? true : false);
+    },
+
+    toggleLove: function(trip) {
+      if (!arguments.length) return;
+      return trip.love = (trip.love ? false : true);
+    },
+
+    reset: function (trip) {
+      Config.sensors().map(function (sensor) { trip.data.sensors[sensor] = []; });
+      trip.extent = [];
+      this.loadData(trip);
+    },
+
+    update: function (trip, data) {
+      trip.name = data.name; // client side update
+
+      $http({ method: 'POST', url: 'api/trips/' + trip.id, data: data })
+      .success(function(data, status, headers, config) {
+        console.info("trip updated:", trip.id);
+      })
+      .error(function(data, status, headers, config) {});
+    },
+
+    // delete a trip
+    delete: function (trip) {
+      trips.splice(trips.indexOf(trip), 1); // client side removal
+
+      $http({ method: 'DELETE', url: 'api/trips/' + trip.id })
+      .success(function(data, status, headers, config) {
+        console.info("trip deleted:", trip.id);
+      })
+      .error(function(data, status, headers, config) {});
+    },
+
+    download: function (trip, sensor, format) {
+      $http({ method: 'GET', url: 'api/trips/' + trip.id + '/sensors/' + sensor + '.' + format })
+      .success(function(data, status, headers, config) {
+        // TODO better downloads
+      });
+    },
+
+    count: function(trip) {
+      Config.sensors().forEach(function (sensor) {
+        // console.log(sensor, Data.count(trip, sensor));
+        debugger
+        Data.count(trip, sensor)
+        .then(function(data) {
+          console.log(data);
+          trip.data.count[sensor] = +data[0].count;
+        });
       });
     }
   };
 }]);
+
