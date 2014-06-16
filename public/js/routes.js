@@ -27,6 +27,20 @@ app.config(function ($routeProvider, $locationProvider) {
     });
 });
 
+app.config(function($provide) {
+  $provide.factory('msgBus', ['$rootScope', function($rootScope) {
+    var msgBus = {};
+    msgBus.emitMsg = function(msg) {
+      $rootScope.$emit(msg);
+    };
+    msgBus.onMsg = function(msg, scope, func) {
+      var unbind = $rootScope.$on(msg, func);
+      scope.$on('$destroy', unbind);
+    };
+    return msgBus;
+  }]);
+});
+
 // to know if there are any $http queries running
 // https://docs.angularjs.org/api/ng/service/$http
 app.config(function ($httpProvider, $provide) {

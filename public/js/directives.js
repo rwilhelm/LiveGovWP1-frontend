@@ -1,5 +1,5 @@
 /* jshint strict:true, devel:true, debug:true */
-/* globals angular, app, d3, L, React, chart */
+/* globals angular, app, d3, L, React, chart, minimap */
 'use strict'; // jshint -W097
 
 // app.directive('minimapPreview', ['$window',
@@ -26,33 +26,33 @@
 //   }
 // ]);
 
-app.directive('minimap', ['$window',
-  function($window) {
+app.directive('minimap', [
+  function () {
     return {
       restrict: 'E',
-      scope: {trip: '=', updateExtent: '&', loadMoreData: '&'},
+      scope: { trip: '=', sensor: '@', updateExtent: '&', loadMoreData: '&' },
       link: function($scope, $element, $attributes) {
-        var minimap = d3.custom.minimap();
-        var minimapElement = d3.select($element[0]); // minimap's 'this' in selection.each
+        console.log('chart directive:', $scope.sensor);
 
-        minimap.on('brushed', function(d, i) {
-          $scope.updateExtent({args: d});
-        });
-
-        minimap.on('brushended', function(d, i) {
-          $scope.loadMoreData({args: d});
-        });
-
-        $scope.$watchCollection('[trip.domain.x, trip.domain.y, trip.extent]', function(val, oldVal) {
-          if ($scope.trip && $scope.trip.domain.x.length && $scope.trip.domain.y.length) {
-            minimapElement
-            .datum({domain: $scope.trip.domain, har: $scope.trip.data.har})
-            .call(minimap
-              .extent($scope.trip.extent.length ? $scope.trip.extent : '')
-              );
+        // FIXME listen, don't watch (is that even possible?)
+        $scope.$watchCollection('[trip.data.domain.x, trip.data.domain.y]', function(val, oldVal) {
+          if ($scope.trip && $scope.trip.data.domain.x.length && $scope.trip.data.domain.y.length && $scope.trip.data.harSummarized.length) {
+            React.renderComponent(
+              minimap({
+                extent  : $scope.trip.data.extent,
+                xDomain : $scope.trip.data.domain.x,
+                yDomain : $scope.trip.data.domain.y,
+                data    : $scope.trip.data.harSummarized,
+                loadMoreData: function(extent, oldExtent) {
+                  $scope.loadMoreData({extent: extent, oldExtent: oldExtent});
+                },
+                updateExtent: function(extent) {
+                  $scope.updateExtent({extent: extent});
+                },
+              }), $element[0]
+            );
           }
         });
-
       }
     };
   }
@@ -62,31 +62,31 @@ app.directive('chart', [
   function () {
     return {
       restrict: 'E',
-      scope: { trip: '=', id: '@', updateExtent: '&', loadMoreData: '&' },
+      scope: { trip: '=', sensor: '@', loadMoreData: '&' },
       link: function($scope, $element, $attributes) {
+        console.log('chart directive:', $scope.sensor);
 
-        console.log('initializing chart directive:', $scope.id);
-
-        // chart.on('brushended', function(d, i) {
-        //   $scope.updateExtent({args: d});
-        //   $scope.loadMoreData({args: d});
-        // });
-
-        $scope.$watchCollection('[trip.data.sensors[id], trip.data.domain.x, trip.data.domain.y]', function(val, oldVal) {
-          if ($scope.trip && val.every(function(v) { return v.length !== 0; })) {
-            var data       = $scope.trip.data;
-            var id         = $scope.id;
-            var sensorData = data.sensors[id];
-            var yDomain    = data.domain.y;
-            var xDomain    = data.domain.x;
-            var extent     = data.extent;
-
+        // FIXME listen, don't watch (is that even possible?)
+        $scope.$watchCollection('[trip.data.sensors[sensor], trip.data.domain.x, trip.data.domain.y, trip.data.extent]', function(val, oldVal) {
+          if ($scope.trip && $scope.trip.data.sensors[$scope.sensor].length && $scope.trip.data.domain.x.length && $scope.trip.data.domain.y.length) {
             React.renderComponent(
               chart({
-                target: id,
-                data: sensorData,
-                extent: extent.length ? extent : xDomain,
-                yDomain: yDomain
+                sensor  : $scope.sensor,
+                data    : $scope.trip.data.sensors[$scope.sensor],
+                extent  : $scope.trip.data.extent,
+                xDomain : $scope.trip.data.domain.x,
+                yDomain : $scope.trip.data.domain.y,
+                loadMoreData: function(extent, oldExtent) {
+                  console.log('directive: loadMoreData', extent, oldExtent);
+                  $scope.loadMoreData({extent: extent, oldExtent: oldExtent});
+                },
+                updateExtent: function(extent) {
+                  $scope.updateExtent({extent: extent});
+                },
+                // onChange: handleChanges(function(extent) {
+                //   $scope.trip.data.extent = extent;
+                //   $scope.$apply();
+                // }
               }), $element[0]
             );
           }
@@ -95,6 +95,18 @@ app.directive('chart', [
     };
   }
 ]);
+
+app.directive('chartInfo', [
+  function() {
+    return {
+      restrict: 'E',
+      scope: { trip: '=', sensor: '@' },
+      templateUrl: 'partial/chart-info',
+      link: function ($scope, $element, $attributes) {
+        $scope.name = $attributes.name;
+      }
+    };
+  }]);
 
 app.directive('map', [
   function () {

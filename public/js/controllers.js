@@ -39,9 +39,13 @@ app.controller('mainCtrl', ['$scope', '$rootScope', '$route', function($scope, $
 }]);
 
 app.controller('tripCtrl',
-  ['$scope', '$location', '$route', '$routeParams', '$q', 'Config', 'Trip',
-  function($scope, $location, $route, $routeParams, $q, Config, Trip) {
-  console.log('loading tripCtrl');
+  ['$scope', '$location', '$route', '$routeParams', '$q', 'Config', 'Trip', 'msgBus',
+  function($scope, $location, $route, $routeParams, $q, Config, Trip, msgBus) {
+  console.log('ctrl: tripCtrl');
+
+  msgBus.onMsg('somemsg', $scope, function() {
+    console.info('___ TRIP CONTROLLER: MESSAGE RECEIVED ___')
+  });
 
   Trip.loadTrips().then(function(data) {
     $scope.trips = data;
