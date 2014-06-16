@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-var minimap = React.createClass({displayName: 'minimap',
+var minimap = React.createClass({
   // http://facebook.github.io/react/docs/component-specs.html
 
   // getInitialState: function() {
