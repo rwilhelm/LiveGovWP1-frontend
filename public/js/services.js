@@ -36,7 +36,7 @@ app.factory('Data',
         // return a promise on the to be received and prepared data. see
         // this.query() in the record controller (recCtrl).
 
-        console.log('loading trip list');
+        console.log('xhr: trips');
 
         $http.get('api/trips')
         .success(function(data, status, headers, config) {
@@ -56,6 +56,7 @@ app.factory('Data',
               data: {
                 gps: [],
                 har: [],
+                harSummarized: [],
                 count: {},
                 extent: [],
                 sensors: {},
@@ -83,9 +84,7 @@ app.factory('Data',
     },
 
     // load sensor data
-    sensor: function (trip, obj) {
-      var t = new Date();
-
+    sensor: function (trip, sensor, obj) {
       var promises = Config.sensors().map(function(sensor) {
         var deferred = $q.defer();
 
@@ -105,26 +104,41 @@ app.factory('Data',
           });
 
           trip.data.sensors[sensor] = trip.data.sensors[sensor].merge(data);
-
-        // defer merged data
-        deferred.resolve(trip.data.sensors[sensor]);
-
+          deferred.resolve(trip.data.sensors[sensor]);
         })
         .error(function (data, status, headers, config) {
-          console.warn('Problems getting', sensor, 'sensor data for trip', trip.id, ('!', '(' + ((new Date() - t) / 1000) + " ms)"));
           deferred.reject();
         });
 
-        // return merged data as promise
         return deferred.promise;
       });
+      return $q.all(promises);
+    },
 
-      // return all promised sensor data
+    count: function (trip, sensor, obj) {
+      var promises = Config.sensors().map(function(sensor) {
+        var deferred = $q.defer();
+
+        $http.get('api/trips/' + trip.id + '/sensors/' + sensor + '/count')
+        .success(function (data, status, headers, config) {
+          trip.data.count[sensor] = data[0].count;
+          deferred.resolve(trip.data.count[sensor]);
+        })
+        .error(function (data, status, headers, config) {
+          deferred.reject();
+        });
+
+        return deferred.promise;
+      });
       return $q.all(promises);
     },
 
     har: function(trip) {
       var deferred = $q.defer();
+
+      if (trip.data.har.length)
+        deferred.resolve(trip.data.har);
+
       $http.get('api/trips/' + trip.id + '/sensors/har')
       .success(function(data) {
         var harTags = data.map(function(d) {
@@ -133,15 +147,33 @@ app.factory('Data',
             tag: d.tag.replace(/[\'\"]+/g, '') // TODO write detox helper
           };
         });
+        trip.data.har = harTags;
+        trip.data.harSummarized = harTags.summarize('tag');
         deferred.resolve(harTags);
       })
       .error(function (data, status, headers, config) {
         deferred.reject();
       });
+
       return deferred.promise;
     },
 
     gps: function(trip) {
+      var deferred = $q.defer();
+
+      if (trip.data.gps.length)
+        deferred.resolve(trip.data.gps);
+
+      $http.get('api/trips/' + trip.id + '/sensors/gps')
+      .success(function(data) {
+        trip.data.gps = data;
+        deferred.resolve(data);
+      })
+      .error(function(data, status, headers, config) {
+        deferred.reject();
+      });
+
+      return deferred.promise;
     },
 
     // load har and gps data, return feature collection
@@ -207,13 +239,12 @@ app.factory('Data',
         "features": []
       };
 
-      var gps = $http.get('api/trips/' + trip.id + '/sensors/gps');
-      var har = $http.get('api/trips/' + trip.id + '/sensors/har');
+      var gps = this.gps(trip);
+      var har = this.har(trip);
 
       $q.all([gps, har]).then(function(data) {
-        var gps = data[0].data;
-        var har = data[1].data;
-
+        var gps = data[0];
+        var har = data[1];
         var gpsLength = gps.length;
         var harLength = har.length;
 
@@ -244,20 +275,6 @@ app.factory('Data',
       });
       return deferred.promise;
     },
-
-    count: function(trip) {
-      // var promises = Config.sensors().map(function(sensor) {
-        var deferred = $q.defer();
-        $http.get('api/trips/' + trip.id + '/sensors/' + sensor + '/count')
-        .success(function (data, status, headers, config) {
-          deferred.resolve(trip.data.count[sensor]);
-        })
-        .error(function (data, status, headers, config) {
-          deferred.reject();
-        });
-        return deferred.promise; // -> then, catch, finally
-      // });
-    }
   };
 }]);
 
@@ -310,18 +327,15 @@ app.service('Trip',
       return selectedTrip;
     },
 
+    // FIXME what a mess
     // load (more) data for a trip
     // obj is optional: { extent: Array[2], windowSize: number }
     loadData: function(trip, obj) {
-      var that = this;
-      var t = new Date();
-      // console.info(trip.id + ": loading data");
-
       // step 1 (async)
-      // xhr: load sensor data for Config.sensors()
-      // xhr: load gps data
-      // xhr: load har data
-      // xhr: load sensor data count
+      // xhr: load sensor data for Config.sensors() √
+      // xhr: load gps data √
+      // xhr: load har data √
+      // xhr: load sensor data count √
 
       // step 2 (after step 1 has finished)
       // create feature collection ()
@@ -333,30 +347,42 @@ app.service('Trip',
       // min and max sensor data for the y-axis. see Config.xDomain() and
       // Config.yDomain())
 
-      Data.har(trip).then(function(harData) {
-        trip.data.har = harData.summarize('tag'); // -> see helpers
+      if (!trip.data.count.acc) {
+        console.log('xhr: count');
+        Data.count(trip);
+      }
 
-        Data.geo(trip).then(function(data) {}); // TODO do only when neccessary
+      if (!trip.data.har.length) {
+        console.log('xhr: har');
+        Data.har(trip);
+      }
 
-        Data.sensor(trip, obj).then(function(data) {
+      if (!trip.data.gps.length) {
+        console.log('xhr: gps');
+        Data.gps(trip);
+      }
 
-          data.forEach(function(sensor) {
-            sensor.forEach(function(c, i, a) {
-              c.tag = trip.data.har.filter(function(d) {
-                if (c.ts >= +d[0] && c.ts <= +d[1]) {
-                  // console.log(c.ts, +d[0], +d[1], d[2]);
-                }
-                return c.ts >= +d[0] && c.ts <= +d[1];
-              }).map(function(d) { return d[2]; })[0]; // argh
-            });
+      if (!trip.data.geo.length) {
+        console.log('xhr: geo');
+        Data.geo(trip);
+      }
+
+      Data.sensor(trip, obj).then(function(data) {
+        console.log('xhr: sensor');
+        data.forEach(function(sensor) {
+          sensor.forEach(function(c, i, a) {
+            c.tag = trip.data.har.filter(function(d) {
+              if (c.ts >= +d[0] && c.ts <= +d[1]) {
+                console.log(c.ts, +d[0], +d[1], d[2]);
+              }
+              return c.ts >= +d[0] && c.ts <= +d[1];
+            }).map(function(d) { return d[2]; })[0]; // argh
           });
-
-          // debugger
-
-          trip.data.domain.x = data.extent(Config.xDomain());
-          trip.data.domain.y = data.extent(Config.yDomain());
-          console.info(trip.id + ": done (" + ((new Date() - t) / 1000) + " ms, " + that.hasData(trip) + ")", trip);
         });
+
+        trip.data.domain.x = data.extent(Config.xDomain());
+        trip.data.domain.y = data.extent(Config.yDomain());
+        console.log('done:', trip);
       });
     },
 

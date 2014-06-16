@@ -7,7 +7,7 @@
  */
 
 app.controller('mainCtrl', ['$scope', '$rootScope', '$route', function($scope, $rootScope, $route) {
-  console.log('loading mainCtrl');
+  console.log('ctrl: mainCtrl');
 
   if (!$rootScope.httpRequests) $rootScope.httpRequests = 0;
   if (!$rootScope.httpRequestErrors) $rootScope.httpRequestErrors = false;
@@ -49,7 +49,6 @@ app.controller('tripCtrl',
 
   Trip.loadTrips().then(function(data) {
     $scope.trips = data;
-    console.log("loading trips from database");
 
     if ($routeParams.trip_id) {
       console.log('trip id is set by route params to', $routeParams.trip_id);
@@ -102,9 +101,9 @@ app.controller('tripCtrl',
 
   // load (more) data for a trip
   // opt arg: { extent: Array[2], windowSize: number } // TODO test if correct -> ?e=?945i324, ?=e1235123
-  this.loadData = function(trip, obj) {
-    Trip.loadData(trip, obj);
-  };
+  // this.loadData = function(trip, obj) {
+  //   Trip.loadData(trip, obj);
+  // };
 
   // reset loaded trip data
   this.reset = function(trip) {
@@ -157,25 +156,42 @@ app.controller('tripCtrl',
     return ($route.current && $route.current.name == loc);
   };
 
-  this.loadMoreData = function(trip) {
-    console.log(Trip.hasData($scope.trip));
-    Trip.loadData($scope.trip, {
-      windowSize: Math.floor(Math.abs((Trip.hasData(trip) / 3) + 200))
-    });
+  $scope.loadMoreData = function(extent, oldExtent) {
+    console.log('controller: loadMoreData', extent, oldExtent);
+    // load more data only if we're zooming in
+    var extentSize = extent.reduce(function(a,b) { return b-a; }, 0);
+    var oldExtentSize = oldExtent.reduce(function(a,b) { return b-a; }, 0);
+
+    if (extentSize === 0) {
+      console.log('Zoom reset: not loading more data');
+    } else {
+      console.log('Zooming changed: loading more data', extentSize, oldExtentSize);
+      Trip.loadData($scope.trip, {
+        extent: extent,
+        windowSize: 200 // Math.floor(Math.abs((Trip.hasData($scope.trip) / 3) + 200))
+      });
+    }
   };
+
+  // // load more data
+  // $scope.loadMoreData = function(extent) {
+  //   Trip.loadData($scope.trip, {extent: extent, windowSize: 200});
+  // };
 
   // update scope (called by directive)
   $scope.updateExtent = function(extent) {
-    // console.log('tripCtrl updateExtent', extent);
+    console.warn('ctrl updating extent', extent);
     $scope.$apply(function() {
-      $scope.trip.extent = extent;
+      $scope.trip.data.extent = extent;
     });
   };
 
-  // load more data
-  $scope.loadMoreData = function(extent) {
-    Trip.loadData($scope.trip, {extent: extent, windowSize: 200});
-  };
+  // $scope.handleChanges = function(extent, oldExtent) {
+  //   // update extent
+  //   $scope.$apply(function() {
+  //     $scope.trip.data.extent = extent;
+  //   });
+  // };
 
   // export data. format can be 'csv' or 'json'
   this.download = function(trip, sensor, format) {
@@ -192,7 +208,7 @@ app.controller('tripCtrl',
 }]);
 
 app.controller('navCtrl', function ($route, $scope, $routeParams, Trip) {
-  console.log('loading navCtrl');
+  console.log('ctrl: navCtrl');
 
   $scope.$on('$routeChangeSuccess', function() {
     $scope.trip_id = $routeParams.trip_id;
