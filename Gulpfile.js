@@ -1,4 +1,6 @@
 var gulp = require('gulp');
+var mocha = require('gulp-mocha');
+var karma = require('gulp-karma');
 var gutil = require('gulp-util');
 var sass = require('gulp-ruby-sass'); // "better" than gulp-sass
 var nodemon = require('gulp-nodemon');
@@ -90,6 +92,41 @@ gulp.task('server', function () {
     .on('change', [])
     .on('restart', []);
 });
+
+var testFiles = [
+  'public/js/todo.js',
+  'public/js/todo.util.js',
+  'public/js/todo.App.js',
+  'test/public/js/*.js'
+];
+
+
+gulp.task('mocha', function() {
+	gulp.src('public/js/*.js')
+	.pipe(mocha({reporter:'nyan'}));
+});
+
+gulp.task('test', function() {
+  // Be sure to return the stream
+  return gulp.src(testFiles)
+    .pipe(karma({
+      configFile: 'test/karma.conf.js',
+      action: 'run'
+    }))
+    .on('error', function(err) {
+      // Make sure failed tests cause gulp to exit non-zero
+      throw err;
+    });
+});
+
+gulp.task('karma', function() {
+  gulp.src(testFiles)
+    .pipe(karma({
+      configFile: 'test/karma.conf.js',
+      action: 'watch'
+    }));
+});
+
 
 // development mode: compile sass and react files once, then watch them for
 // changes and start the server on port 4001
