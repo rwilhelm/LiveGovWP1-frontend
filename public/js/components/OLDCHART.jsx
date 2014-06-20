@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-var chart = React.createClass({
+var OLDCHART = React.createClass({displayName: 'chart',
   // http://facebook.github.io/react/docs/component-specs.html
 
   // getDefaultProps: function() {

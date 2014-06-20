@@ -1,50 +1,12 @@
-/* jshint strict:true, devel:true, debug:true */
-/* globals app, d3 */
-'use strict'; // jshint -W097
-
-/*
-  See 'Controllers' section in README.md for documentation.
- */
-
-app.controller('mainCtrl', ['$scope', '$rootScope', '$route', function($scope, $rootScope, $route) {
-  console.log('ctrl: mainCtrl');
-
-  if (!$rootScope.httpRequests) $rootScope.httpRequests = 0;
-  if (!$rootScope.httpRequestErrors) $rootScope.httpRequestErrors = false;
-
-  $scope.$on('$routeChangeSuccess', function() {
-    console.log('route changed');
-    $scope.template = $route.current.templateUrl;
-  });
-
-  $scope.$on('httpRequest', function(e) {
-    // console.log('http request started');
-    $rootScope.httpRequests++;
-  });
-
-  $scope.$on('httpResponse', function(e) {
-    // console.log('http request finished');
-    $rootScope.httpRequests--;
-  });
-
-  $scope.$on('httpRequestError', function(e) {
-    console.error('http request error');
-    $rootScope.httpRequestErrors = true;
-  });
-
-  $scope.$on('httpResponseError', function(e) {
-    console.error('http response error');
-    $rootScope.httpRequests--;
-  });
-}]);
-
 app.controller('tripCtrl',
   ['$scope', '$location', '$route', '$routeParams', '$q', 'Config', 'Trip', 'msgBus',
   function($scope, $location, $route, $routeParams, $q, Config, Trip, msgBus) {
   console.log('ctrl: tripCtrl');
 
+  // TODO split into separate files
+
   msgBus.onMsg('somemsg', $scope, function() {
-    console.info('___ TRIP CONTROLLER: MESSAGE RECEIVED ___')
+    console.info('___ TRIP CONTROLLER: MESSAGE RECEIVED ___');
   });
 
   Trip.loadTrips().then(function(data) {
@@ -206,19 +168,3 @@ app.controller('tripCtrl',
     return (d.ts >= $scope.trip.data.extent[0] && d.ts <= $scope.trip.data.extent[1]) ? true : false;
   };
 }]);
-
-app.controller('navCtrl', function ($route, $scope, $routeParams, Trip) {
-  console.log('ctrl: navCtrl');
-
-  $scope.$on('$routeChangeSuccess', function() {
-    $scope.trip_id = $routeParams.trip_id;
-  });
-
-  this.selected = function() {
-    return Trip.selected();
-  };
-
-  this.loc = function(loc) {
-    return ($route.current && $route.current.name == loc);
-  };
-});

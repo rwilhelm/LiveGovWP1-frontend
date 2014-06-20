@@ -2,6 +2,21 @@
 //- tripCtrl to mainCtrl
 
 div(ng-controller="tripCtrl as ctrl")
+
+  //- REACT CHAOS STARTS HERE
+
+  //- #bla
+  //- script(src='./js/components/Bla.js')
+  //- script
+    //- React.renderComponent(Chart({data:this.props.data}), this.getDOMNode())
+  //- Chart(data='{{trip.data.sensors.gra}}', sensor='gra')
+  //- script(type="text/jsx")
+  //-   /*** @jsx React.DOM */
+  //-   React.renderComponent(Chart({data:'trip.data.sensors.gra'}), document.getElementById('bla'))
+
+  //- REACT CHAOS ENDS HERE
+
+
   #container
     pre
       | trip.data.extent:   {{ trip.data.extent }}
@@ -36,14 +51,14 @@ div(ng-controller="tripCtrl as ctrl")
       minimap(trip="trip", update-Extent="updateExtent(extent)", load-More-Data="loadMoreData(extent, oldExtent)")
 
 
-  //- data-table(sensor='gra', trip='trip')
-  //- data-table(sensor='acc', trip='trip')
-  //- data-table(sensor='lac', trip='trip')
-  //- data-table(sensor='har', trip='trip')
-  //- data-table(sensor='gps', trip='trip')
-  //- data-table(sensor='geo', trip='trip')
+  data-table(sensor='gra', trip='trip')
+  data-table(sensor='acc', trip='trip')
+  data-table(sensor='lac', trip='trip')
+  data-table(sensor='har', trip='trip')
+  data-table(sensor='gps', trip='trip')
+  data-table(sensor='geo', trip='trip')
 
-  //- minimap(trip='trip', extent='{{ trip.data.extent }}')
+  minimap(trip='trip', extent='{{ trip.data.extent }}')
 
 
 
