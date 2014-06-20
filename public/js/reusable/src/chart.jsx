@@ -87,8 +87,13 @@ var chart = React.createClass({
       .x(function(d) { return xScale(d[0]); }) // String timestamp
       .y(function(d) { return yScale(d[1]); }); // Number value
 
+    var map = {};
+
+    d3.select(element)
+      .classed('chart-container', true);
+
     if (d3.select(element).select('svg').empty()) {
-      d3.select(element)
+      map.svg = d3.select(element)
         .append('svg')
           .classed('chart', true)
           .attr("width", chartWidth)
@@ -101,6 +106,86 @@ var chart = React.createClass({
           .attr("height", chartHeight);
     }
 
+    d3.select(element).selectAll('canvas').remove();
+
+    if (d3.select(element).select('canvas').empty()) {
+      map.canvas = d3.select(element)
+        .append('canvas')
+          .classed('chart', true)
+          .attr('width', chartWidth)
+          .attr('height', chartHeight)
+          .node().getContext('2d');
+    }
+
+    d3.select(element)
+      .classed('chart-container', true);
+
+    // map.svg.append('rect')
+    //   .attr('class', 'overlay')
+    //   .attr('width', chartWidth)
+    //   .attr('height', chartHeight);
+
+    map.canvas.paths = function() {
+      ['x', 'y', 'z'].forEach(function(c,i,a) {
+        data.forEach(function(d,j,b) {
+          if (!b[j+1]) return;
+          map.canvas.beginPath();
+          var cx = xScale(d.ts) + margin.left;
+          var cy = yScale(d[c]) + margin.top;
+          var dx = xScale(b[j+1].ts) + margin.left;
+          var dy = yScale(b[j+1][c]) + margin.top;
+          map.canvas.moveTo(cx, cy);
+          map.canvas.lineTo(dx, dy);
+          map.canvas.lineWidth = 1;
+          map.canvas.strokeStyle = colors[i];
+          map.canvas.stroke();
+        });
+      });
+    }
+
+    map.canvas.circles = function() {
+      ['x', 'y', 'z'].forEach(function(c,i,a) {
+        data.forEach(function(d) {
+          map.canvas.beginPath();
+          var cx = xScale(d.ts) + margin.left;
+          var cy = yScale(d[c]) + margin.top;
+          var r = 2;
+          map.canvas.moveTo(cx, cy);
+          map.canvas.arc(cx, cy, r, 0, 2 * Math.PI);
+          map.canvas.lineWidth = 0.2;
+          // map.canvas.strokeStyle = colors[i];
+          map.canvas.fillStyle = colors[i];
+          // map.canvas.stroke();
+          map.canvas.fill();
+        });
+      });
+    }
+
+    map.canvas.draw = function() {
+      // map.canvas.save();
+      // map.canvas.clearRect(0, 0, width, height);
+      map.canvas.circles();
+      map.canvas.paths();
+      // map.canvas.restore();
+    };
+
+
+    var colors = ['#1d1f21', '#dc143c', '#1e90ff'];
+
+    map.redraw = function() {
+      map.canvas.draw();
+      // circle.attr('transform', map.svg.transform);
+
+      // map.canvas.save();
+      // map.canvas.clearRect(0, 0, width, height);
+      // map.canvas.draw();
+      // map.canvas.restore();
+    };
+
+    map.svg.transform = function(d) {
+      return 'translate(' + x( d.x ) + ',' + y( d.y ) + ')';
+    };
+
     // remove old charts from svg element
     d3.select(element).select('svg').selectAll("g.chart").remove();
     d3.select(element).select('svg').selectAll("text").remove();
@@ -108,6 +193,11 @@ var chart = React.createClass({
 
     // select svg element
     var svg = d3.select(element).select('svg').data(data);
+    // map.canvas.save();
+    // map.canvas.setTransform(1, 0, 0, 1, 0, 0);
+    // map.canvas.clearRect(margin.left, margin.top, width, height);
+    // map.canvas.restore();
+    map.canvas.draw();
 
     var translate = function(x, y) {
       return (margin.left + x) + "," + (margin.top + y);
@@ -148,58 +238,6 @@ var chart = React.createClass({
       .attr("y", (10 - 3)) // font size - axis shift
       .text("sensor value");
 
-    // x-value line
-    chart.append("path")
-      .attr("class", "line line0")
-      .attr("clip-path", "url(#clip)")
-      .attr("d", line(data.map(function(d) { return [d.ts, d.x]; })));
-
-    // x-value circles
-    svg.selectAll("line0")
-      .data(data)
-      .enter()
-      .append("svg:circle")
-      .attr("clip-path", "url(#clip)")
-      .attr("transform", "translate(" + chartOffset + ")")
-      .attr("cx", function(d) { return xScale(d.ts); })
-      .attr("cy", function(d) { return yScale(d.x); })
-      .attr("r", circleRadius)
-      .attr("class", "circle circle0");
-
-    // y-value line
-    chart.append("path")
-      .attr("class", "line line1")
-      .attr("clip-path", "url(#clip)")
-      .attr("d", line(data.map(function(d) { return [d.ts, d.y]; })));
-
-    // y-value circles
-    svg.selectAll("line1")
-      .data(data)
-      .enter().append("svg:circle")
-      .attr("clip-path", "url(#clip)")
-      .attr("transform", "translate(" + chartOffset + ")")
-      .attr("cx", function(d) { return xScale(d.ts); })
-      .attr("cy", function(d) { return yScale(d.y); })
-      .attr("r", circleRadius)
-      .attr("class", "circle circle1");
-
-    // z-value line
-    chart.append("path")
-      .attr("class", "line line2")
-      .attr("clip-path", "url(#clip)")
-      .attr("d", line(data.map(function(d) { return [d.ts, d.z]; })));
-
-    // z-value circles
-    svg.selectAll("line2")
-      .data(data)
-      .enter().append("svg:circle")
-      .attr("clip-path", "url(#clip)")
-      .attr("transform", "translate(" + chartOffset + ")")
-      .attr("cx", function(d) { return xScale(d.ts); })
-      .attr("cy", function(d) { return yScale(d.z); })
-      .attr("r", circleRadius)
-      .attr("class", "circle circle2");
-
     // brush
     brush.x(xScale)
       .on("brushend", brushended);
@@ -220,13 +258,13 @@ var chart = React.createClass({
   },
 
   loadMoreData: function(extent) {
-    this.setState({ extent: extent });
+    // this.setState({ extent: extent });
     console.log('chart component: loadMoreData', extent);
     return this.props.loadMoreData(extent, this.props.extent);
   },
 
   render: function() {
     // console.info('chart component: render', this.props);
-    return React.DOM.div();
+    return React.DOM.div({class: 'chart'});
   }
 });
