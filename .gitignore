@@ -24,3 +24,4 @@ public/js/components/*.js
 public/js/reusable/*.js
 public/html/*.html
 public/js/reusable/src/*.js
+Session.vim
