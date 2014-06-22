@@ -3,7 +3,13 @@
 
 # TESTS
 
+- trip.sensorData.xDomain: Array of Numbers, length = 2
 
+- trip.sensorData.yDomain: Array of Numbers, length = 2
+
+- trip.sensorData.extent: Array of Numbers, length = 2 || 0
+
+- trip.sensorData.sensors: Array of Objects, length != 0
 
 ## basic workflow
 

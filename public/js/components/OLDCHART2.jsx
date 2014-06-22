@@ -1,5 +1,5 @@
 /** @jsx React.DOM */
-var OLDCHART = React.createClass({displayName: 'chart',
+var OLDCHART2 = React.createClass({displayName: 'chart',
   // http://facebook.github.io/react/docs/component-specs.html
 
   // getDefaultProps: function() {
@@ -59,6 +59,50 @@ var OLDCHART = React.createClass({displayName: 'chart',
   //   // console.info('chart component: componentWillUnmount', this.props);
   // },
 
+  appendClipPath: function(element) {
+    var chartWidth = width + margin.left + margin.right;
+    var chartHeight = height + margin.top + margin.bottom;
+
+    if (d3.select(element).select('defs').empty()) {
+      d3.select(element)
+        .append("clipPath")
+          .attr("id", "clip")
+          .append("rect")
+            .attr("width", chartWidth)
+            .attr("height", chartHeight);
+    }
+  },
+
+  appendSvg: function(element) {
+    var chartWidth = width + margin.left + margin.right;
+    var chartHeight = height + margin.top + margin.bottom;
+
+    d3.select(element)
+      .append('svg')
+        .classed('chart', true)
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
+  },
+
+  cleanUpElement: function(element) {
+    d3.select(element).selectAll('canvas').remove();
+    d3.select(element).select('svg').selectAll("g.chart").remove();
+    d3.select(element).select('svg').selectAll("text").remove();
+    d3.select(element).select('svg').selectAll("circle").remove();
+  },
+
+  drawCanvasCircles: function(element) {
+    d3.select(element).selectAll('canvas').remove();
+    if (d3.select(element).select('canvas').empty()) {
+      map.canvas = d3.select(element)
+        .append('canvas')
+          .classed('chart', true)
+          .attr('width', chartWidth)
+          .attr('height', chartHeight)
+          .node().getContext('2d');
+    }
+  },
+
   renderChart:function() {
     // console.info('chart component: renderChart', this.props);
     var margin = {top: 2, right: 1, bottom: 21, left: 24 },
@@ -99,11 +143,11 @@ var OLDCHART = React.createClass({displayName: 'chart',
           .attr("width", chartWidth)
           .attr("height", chartHeight)
         .append("defs")
-        .append("clipPath")
-          .attr("id", "clip")
-        .append("rect")
-          .attr("width", chartWidth)
-          .attr("height", chartHeight);
+          .append("clipPath")
+            .attr("id", "clip")
+            .append("rect")
+              .attr("width", chartWidth)
+              .attr("height", chartHeight);
     }
 
     d3.select(element).selectAll('canvas').remove();
@@ -264,7 +308,11 @@ var OLDCHART = React.createClass({displayName: 'chart',
   },
 
   render: function() {
-    // console.info('chart component: render', this.props);
-    return <div class='chart' />;
+    console.info('chart component: render', this.props);
+    return (
+      <div>
+        <defs />
+      </div>
+    );
   }
 });

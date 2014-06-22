@@ -3,17 +3,20 @@
 var ClipPath = React.createClass({
   getDefaultProps: function() {
     return {
-      width: this.getDOMNode().offsetWidth,
       height: 20,
     };
   },
+  componentDidMount: function() {
+    return {
+      width: this.getDOMNode().offsetWidth,
+    };
+  },
   render: function() {
-    console.log('me too');
     return (
       <defs>
-        <clipPath id='clip'>
-          <rect width={this.prop.width} height={this.prop.height}/>
-        </clipPath>
+        <clippath id="clip">
+          <rect width={this.props.width} height={this.props.height}/>
+        </clippath>
       </defs>
     );
   }

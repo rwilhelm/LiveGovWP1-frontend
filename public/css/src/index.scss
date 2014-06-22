@@ -7,14 +7,18 @@
 }
 
 // base colors
-
 $color1: #fece09;
 $color2: #0b66ff;
-// table colors
 
+// table colors
 $table-row-hovered: lighten($color2, 45%);
 $table-row-selected: lighten($color1, 45%);
 $table-row-selected-hovered: lighten($color1, 35%);
+
+// chart colors
+$color-x: #2074c7;
+$color-y: #24c02e;
+$color-z: #b92819;
 
 /*   GLOBAL   */
 
@@ -194,8 +198,15 @@ tbody {
 
 /*   SVG   */
 
+path.domain {
+  stroke: #333;
+  color: #2074c7;
+}
+
 svg {
   font: 11px sans-serif;
+
+  height: 100%;
 
   // .axis {
   //   stroke: #999;
@@ -216,18 +227,21 @@ svg {
     // stroke-dasharray: 20,20;
   }
 
-  .line {
-    stroke: #000;
+  .path {
     stroke-width: 0.75px;
     fill: none;
   }
 
-  .line1 {
-    stroke: #dc143c;
+  .pathx {
+    stroke: $color-x;
   }
 
-  .line2 {
-    stroke: #1e90ff;
+  .pathy {
+    stroke: $color-y;
+  }
+
+  .pathz {
+    stroke: $color-z;
   }
 
   .circle {
@@ -346,12 +360,6 @@ pre {
   padding: 8px;
 }
 
-chart {
-  clip-path: url(#clip);
-}
-
-
-
 .brush {
   // border-radius: 4px;
   background-color: rgba(0,0,0,0.2); //#f5f5f5;
@@ -362,6 +370,7 @@ chart {
 chart {
   width: 100%;
   display: inline-block;
+  clip-path: url(#clip);
 }
 
 .row.brush {
@@ -435,7 +444,7 @@ minimap {
 
 .chart-container {
   position: relative;
-  min-height: 300px;
+  // min-height: 300px;
 }
 
 svg.chart,
@@ -447,5 +456,4 @@ canvas.chart {
 }
 
 rect { fill: transparent; }
-
 

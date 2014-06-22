@@ -35,6 +35,23 @@
     });
   };
 
+  // sum object of arrays
+  // Object.prototype.length = function() {
+  //   var that = this;
+  //   return Object.keys(this).map(function(k){
+  //     return that[k].length;
+  //   }).reduce(function(a,b){
+  //     return a+b;
+  //   });
+  // };
+
+          // function sensorDataCount() {
+          //   if (!$scope.trip) return false;
+          //   return Object.keys($scope.trip.sensorData.sensors)
+          //   .map(function(k){return $scope.trip.sensorData.sensors[k].length;})
+          //   .reduce(function(a,b){return a+b;});
+          // }
+
   Array.prototype.summarize = function(val) { // har tags [{ts: string, tag: string}]
     var j=0;
     return this.map(function(c, i, a) {
