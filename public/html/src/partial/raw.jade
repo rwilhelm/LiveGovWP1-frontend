@@ -2,26 +2,11 @@
 //- tripCtrl to mainCtrl
 
 div(ng-controller="tripCtrl as ctrl")
-
-  //- REACT CHAOS STARTS HERE
-
-  //- #bla
-  //- script(src='./js/components/Bla.js')
-  //- script
-    //- React.renderComponent(Chart({data:this.props.data}), this.getDOMNode())
-  //- Chart(data='{{trip.data.sensors.gra}}', sensor='gra')
-  //- script(type="text/jsx")
-  //-   /*** @jsx React.DOM */
-  //-   React.renderComponent(Chart({data:'trip.data.sensors.gra'}), document.getElementById('bla'))
-
-  //- REACT CHAOS ENDS HERE
-
-
   #container
     pre
-      | trip.data.extent:   {{ trip.data.extent }}
-      | trip.data.domain.x: {{ trip.data.domain.x }}
-      | trip.data.domain.y: {{ trip.data.domain.y }}
+      | trip.sensorData.extent:  {{ trip.sensorData.extent }}
+      | trip.sensorData.xDomain: {{ trip.sensorData.xDomain }}
+      | trip.sensorData.yDomain: {{ trip.sensorData.yDomain }}
 
     .container-fluid
       //- .row
@@ -38,13 +23,13 @@ div(ng-controller="tripCtrl as ctrl")
         .col-xs-11
           chart(trip='trip', sensor='acc', load-More-Data="loadMoreData(extent, oldExtent)")
         .col-xs-1
-          chart-info(trip='trip', sensor='gra', name='Acceleration')
+          chart-info(trip='trip', sensor='acc', name='Acceleration')
 
       .row
         .col-xs-11
           chart(trip='trip', sensor='lac', load-More-Data="loadMoreData(extent, oldExtent)")
         .col-xs-1
-          chart-info(trip='trip', sensor='gra', name='Linear Acceleration')
+          chart-info(trip='trip', sensor='lac', name='Linear Acceleration')
 
     #bottom
       //- minimap(trip="trip", handle-Changes='handleChanges(extent, oldExtent)')

@@ -1,4 +1,4 @@
 h4 {{ name }}
-div {{ trip.data.sensors[sensor].length }}/{{ trip.data.count[sensor] }}
+div {{ trip.sensorData.sensors[sensor].length }}/{{ trip.sensorData.count[sensor] }}
 a(ng-href="./trips/{{trip.id}}/gra.csv", download='livegov-trip-{{trip.id}}-sensor-gra.csv') JSON 
 a(ng-href="./trips/{{trip.id}}/gra.csv", download='livegov-trip-{{trip.id}}-sensor-gra.csv') CSV
