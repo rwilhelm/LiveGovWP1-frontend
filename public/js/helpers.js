@@ -27,6 +27,13 @@
     }).pop();
   };
 
+  Array.prototype.dataSeries = function(props) {
+    return this.map(function(d) {
+      return props.map(function(p) {
+        return d[p];
+      });
+    });
+  };
 
   Array.prototype.summarize = function(val) { // har tags [{ts: string, tag: string}]
     var j=0;
