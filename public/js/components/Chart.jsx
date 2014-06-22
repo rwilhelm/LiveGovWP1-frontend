@@ -1,46 +1,80 @@
 /*** @jsx React.DOM */
 
 var Chart = React.createClass({
-  getDefaultProps: function() {
-    var margin = {top: 2, right: 1, bottom: 21, left: 24 };
-    var translate = function(x, y) {
-      return (margin.left + x) + "," + (margin.top + y);
-    };
-
-    return {
-      translate: translate,
-      margin: margin,
-    };
+  propTypes: {
+    // size.width: React.PropTypes.number.isRequired,
+    // size.height: React.PropTypes.number.isRequired,
+    // offset.y: React.PropTypes.number.isRequired,
+    // offset.x: React.PropTypes.number.isRequired
   },
-
   componentDidMount: function() {
-    return {
-      width: this.getDOMNode().offsetWidth - this.props.margin.left - this.props.margin.right,
-      height: 192,
-    };
-  },
+    console.info('Chart:componentDidMount', this.props.extent);
+    var xScale = d3.time.scale()
+      .range([0, this.props.size.width]);
 
-  // <Chart ref="acc" class="chart acc" data="data.acc"/>
+    var yScale = d3.scale.linear()
+      .range([this.props.size.height, 0]);
+
+    xScale.domain(this.props.extent.length ? this.props.extent : this.props.xDomain);
+    yScale.domain(this.props.yDomain);
+
+    var xAxis = d3.svg.axis().scale(xScale)
+      .orient("bottom")
+      .ticks(d3.time.minutes, 1);
+
+    var yAxis = d3.svg.axis().scale(yScale)
+      .orient("left")
+      .ticks(Math.max(this.props.size.height / 25, 2));
+
+    var chart = d3.select(this.getDOMNode().children[0]);
+
+    // x-axis
+    chart
+      .append('g')
+        .attr("class", "x axis")
+        .attr("transform", this.props.offset.x)
+        .call(xAxis);
+
+    // y-axis
+    chart
+      .append("g")
+        .attr("class", "y axis")
+        .attr("transform", this.props.offset.y)
+        .call(yAxis);
+
+    // x-label
+    chart
+      .append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", this.props.axisLabel.xAxis.x)
+        .attr("y", this.props.axisLabel.xAxis.y)
+        .text(this.props.axisLabel.xAxis.text);
+
+    // y-label
+    chart
+    .append("text")
+      .attr("class", "y label")
+      .attr("text-anchor", "start")
+      .attr("x", this.props.axisLabel.yAxis.x)
+      .attr("y", this.props.axisLabel.yAxis.y)
+      .text(this.props.axisLabel.yAxis.text);
+  },
+  componentWillUpdate: function(nextProps, nextState) {
+    console.log('Chart.jsx:componentWillUpdate', nextProps, nextState);
+  },
   render: function() {
+    console.info('Chart:render', this.props);
+
+    var offset = this.props.offset;
+    var size = this.props.size;
+
     return (
-      <svg class="chart" width={this.props.width} height={this.props.height}>
-        <ClipPath/>
-        <g transform={this.prop.translate(0, 0)}>
-          <Label class="label labelx" text-anchor="end" x={this.props.width} y={this.props.heigth}> time </Label>
-          <Label class="label labely" text-anchor="start" x="0" y={10-3}> sensor value </Label>
-          <Axis class="axis axisx" transform={this.prop.translate(0, this.prop.height + 3)}/>
-          <Axis class="axis axisy" transform={this.prop.translate(-3, this.prop.margin.top)}/>
-          <Path ref="path1" class="path path1" d={this.data('y')} transform={this.prop.translate(0, this.prop.height + 3)}/>
-          <Path ref="path2" class="path path2" d={this.data('x')} transform={this.prop.translate(0, this.prop.height + 3)}/>
-          <Path ref="path3" class="path path3" d={this.data('z')} transform={this.prop.translate(0, this.prop.height + 3)}/>
-          <Circles ref="circles1" class="circles circles1" d={this.data('x')}/>
-          <Circles ref="circles2" class="circles circles2" d={this.data('y')}/>
-          <Circles ref="circles3" class="circles circles3" d={this.data('z')}/>
-          <Brush />
+      <svg size={size}>
+        <g transform={offset.g}>
+          {this.props.children}
         </g>
       </svg>
     );
   }
 });
-
-React.renderComponent(<Chart data={this.props.data} />, this.getDOMNode());
