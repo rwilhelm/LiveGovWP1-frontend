@@ -1,9 +1,6 @@
 app.controller('tripCtrl',
   ['$scope', '$location', '$route', '$routeParams', '$q', 'Config', 'Trip', 'msgBus',
   function($scope, $location, $route, $routeParams, $q, Config, Trip, msgBus) {
-  console.log('ctrl: tripCtrl');
-
-  // TODO split into separate files
 
   msgBus.onMsg('somemsg', $scope, function() {
     console.info('___ TRIP CONTROLLER: MESSAGE RECEIVED ___');
@@ -13,7 +10,7 @@ app.controller('tripCtrl',
     $scope.trips = data;
 
     if ($routeParams.trip_id) {
-      console.log('trip id is set by route params to', $routeParams.trip_id);
+      console.log('tripCtrl:loadTrips trip id is set by route params to', $routeParams.trip_id);
       $scope.trip = $scope.trips.filter(function(d) {
         return d.id == $routeParams.trip_id;
       })[0];
@@ -119,10 +116,13 @@ app.controller('tripCtrl',
   };
 
   $scope.loadMoreData = function(extent, oldExtent) {
-    console.log('controller: loadMoreData', extent, oldExtent);
+    console.log('tripCtrl:loadMoreData', extent, oldExtent);
     // load more data only if we're zooming in
     var extentSize = extent.reduce(function(a,b) { return b-a; }, 0);
     var oldExtentSize = oldExtent.reduce(function(a,b) { return b-a; }, 0);
+    $scope.$apply(function() {
+      $scope.trip.sensorData.extent = extent;
+    });
 
     if (extentSize === 0) {
       console.log('Zoom reset: not loading more data');
@@ -134,26 +134,6 @@ app.controller('tripCtrl',
       });
     }
   };
-
-  // // load more data
-  // $scope.loadMoreData = function(extent) {
-  //   Trip.loadData($scope.trip, {extent: extent, windowSize: 200});
-  // };
-
-  // update scope (called by directive)
-  $scope.updateExtent = function(extent) {
-    console.warn('ctrl updating extent', extent);
-    $scope.$apply(function() {
-      $scope.trip.data.extent = extent;
-    });
-  };
-
-  // $scope.handleChanges = function(extent, oldExtent) {
-  //   // update extent
-  //   $scope.$apply(function() {
-  //     $scope.trip.data.extent = extent;
-  //   });
-  // };
 
   // export data. format can be 'csv' or 'json'
   this.download = function(trip, sensor, format) {

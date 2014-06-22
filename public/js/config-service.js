@@ -5,7 +5,6 @@
 
 // TODO MAKE TRIP.JS BUNDLE
 
-
 (function() {
 	'use strict';
 

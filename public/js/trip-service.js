@@ -12,7 +12,7 @@
 		function($http, $q, Config, Data) {
 
 		var trips = []; // all data is stored in here
-		var selectedTrip; // a copy(?) of the currently selected trip object
+		var selectedTrip;
 
 		return {
 
@@ -63,22 +63,27 @@
 				// min and max sensor data for the y-axis. see Config.xDomain() and
 				// Config.yDomain())
 
-				if (!trip.data.count.acc) {
+				var tags = trip.harData.tags;
+				var count = trip.sensorData.count;
+				var gps = trip.harData.gps;
+				var geo = trip.harData.geo;
+
+				if (!count.acc) {
 					console.log('xhr: count');
 					Data.count(trip);
 				}
 
-				if (!trip.data.har.length) {
+				if (!tags.length) {
 					console.log('xhr: har');
 					Data.har(trip);
 				}
 
-				if (!trip.data.gps.length) {
+				if (!gps.length) {
 					console.log('xhr: gps');
 					Data.gps(trip);
 				}
 
-				if (!trip.data.geo.length) {
+				if (!geo.features) {
 					console.log('xhr: geo');
 					Data.geo(trip);
 				}
@@ -87,22 +92,22 @@
 					console.log('xhr: sensor');
 					data.forEach(function(sensor) {
 						sensor.forEach(function(c, i, a) {
-							c.tag = trip.data.har.filter(function(d) {
+							c.tag = tags.filter(function(d) {
 								if (c.ts >= +d[0] && c.ts <= +d[1]) {
-									console.log(c.ts, +d[0], +d[1], d[2]);
+									console.log(c.ts, +d[0], +d[1], d[2], "XXX CHECK ME XXX");
 								}
 								return c.ts >= +d[0] && c.ts <= +d[1];
-							}).map(function(d) { return d[2]; })[0]; // argh
+							}).map(function(d) { return d[2]; })[0]; // argh, whats happening here?
 						});
 					});
-
-					trip.data.domain.x = data.extent(Config.xDomain());
-					trip.data.domain.y = data.extent(Config.yDomain());
-					console.log('done:', trip);
+					trip.sensorData.xDomain = data.calculateExtent(Config.xDomain());
+					trip.sensorData.yDomain = data.calculateExtent(Config.yDomain());
+					console.info('done:', trip);
 				});
 			},
 
 			// test if a trip is selected
+			// FIXME refactor
 			selected: function(trip) {
 				if (!arguments.length) {
 					return selectedTrip ? selectedTrip : false;
@@ -113,8 +118,9 @@
 			// test if trip data is loaded
 			hasData: function(trip) {
 				if (!arguments.length) return;
+				var sensors = trip.sensorData.sensors;
 				return Config.sensors()
-					.map(function (d) { return trip.data.sensors[d].length; })
+					.map(function (sensor) { return sensors[sensor].length; })
 					.reduce(function (a, b) { return a + b; });
 			},
 
@@ -187,5 +193,3 @@
 	}]);
 
 }()); //eof
-
-

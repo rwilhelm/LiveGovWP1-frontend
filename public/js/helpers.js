@@ -9,9 +9,9 @@
   };
 
   // return array of property values, e.g. [[objs],...] -> [props]
-  Array.prototype.select = function(properties) {
+  Array.prototype.select = function(props) {
     return this.flatten().map(function(d) {
-      return properties.map(function(p) {
+      return props.map(function(p) {
         return d[p];
       });
     }).flatten();
@@ -97,8 +97,10 @@
 
   /* D3 */
 
-  Array.prototype.extent = function(a) {
-    return d3.extent(this.select(a)); // e.g. ['avgx, avgy, avgz']
+  Array.prototype.calculateExtent = function(a) {  // e.g. ['avgx, avgy, avgz']
+    return d3.extent(this.select(a)).map(function(d) {
+      return +d;
+    });
   };
 
 
