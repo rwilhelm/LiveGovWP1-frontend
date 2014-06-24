@@ -59,6 +59,7 @@ var SensorChart = React.createClass({
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
+    return true;
   },
 
   componentWillUpdate: function(nextProps, nextState) {
