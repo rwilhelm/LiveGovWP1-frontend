@@ -45,36 +45,24 @@
             // here and it'll break all over the place. fixable? FIXME)
             trips = data.map(function(d) {
               var trip = {
-                id: d.trip_id,
-                name: d.name,
-                user: d.user_id.replace(/['"]+/g, ''), // TODO write helper to detox strings
-                duration: +d.stop_ts - (+d.start_ts) - 3600000, // FIXME -1h wrong ts in db
-                love: false, // TODO use local storage
-
-                // watch this in chart-directive (FIXME less is more! only extent!)
-                // (r) = react, (a) = angular, (d3) = d3
-                //
-                // (d3)brush -> (d3)extent -> (r)loadMoreData(FIXME!onChange?) -> (a)chartDirective -> controller(scope)
-                //
-                sensorData: {
-                  count: {},
-                  extent: [],
-                  xDomain: [],
-                  yDomain: [],
-                  sensors: {},
-                },
-
-                // not this
-                harData: {
-                  tags: [], // vanilla tags
-                  tagsSum: [], // summarized tags
-                  gps: [], // vanilla gps
-                  geo: [], // feature collection (gps + har)
+                id        : d.trip_id,
+                name      : d.name,
+                user      : d.user_id.replace(/['"]+/g, ''), // TODO write helper to detox strings
+                duration  : +d.stop_ts - (+d.start_ts) - 3600000, // FIXME -1h wrong ts in db
+                love      : false, // TODO use local storage
+                extent    : [], // FIXME! angular doesn't need to know about the extent anymore!
+                dataCount : 0,
+                data: {
+                  har: [], // Human Activity Recognition Tags
+                  gps: [],
                 },
               };
 
-              // create empty sensor objects
-              Config.sensors().map(function (sensor) { trip.sensorData.sensors[sensor] = []; });
+              // create empty sensor arrays (acc, gra, lac) on the above data object
+              Config.sensors().map(function(sensor) {
+                trip.data[sensor] = [];
+              });
+
               return trip;
             });
 
@@ -134,8 +122,8 @@
 
           $http.get('api/trips/' + trip.id + '/sensors/' + sensor + '/count')
           .success(function (data, status, headers, config) {
-            trip.sensorData.count[sensor] = data[0].count;
-            deferred.resolve(trip.sensorData.count[sensor]);
+            trip.dataCount[sensor] = data[0].count;
+            deferred.resolve(trip.dataCount[sensor]);
           })
           .error(function (data, status, headers, config) {
             deferred.reject();
@@ -151,19 +139,19 @@
         console.log('dataFactory:har XHR');
 
         var deferred = $q.defer();
-        if (trip.harData.tags.length) {
-          deferred.resolve(trip.harData.tags);
+        if (trip.data.har.length) {
+          deferred.resolve(trip.data.har);
         } else {
           $http.get('api/trips/' + trip.id + '/sensors/har')
           .success(function(data) {
-            trip.harData.tags = data.map(function(d) {
+            trip.data.har = data.map(function(d) {
               return {
                 ts: d.ts,
                 tag: d.tag.replace(/[\'\"]+/g, '') // TODO write detox helper
               };
             });
-            trip.harData.tagsSum = trip.harData.tags.summarize('tag'); // -> helpers
-            deferred.resolve(trip.harData.tags);
+            trip.data.harSum = trip.data.har.summarize('tag'); // -> helpers
+            deferred.resolve(trip.data.har);
           })
           .error(function (data, status, headers, config) {
             console.warn('Failed fetching har tags');
@@ -178,13 +166,13 @@
         console.log('dataFactory:gps XHR');
 
         var deferred = $q.defer();
-        if (trip.harData.gps.length) {
-          deferred.resolve(trip.harData.gps); // resolve old trip data
+        if (trip.data.gps.length) {
+          deferred.resolve(trip.data.gps); // resolve old trip data
         } else {
           $http.get('api/trips/' + trip.id + '/sensors/gps')
           .success(function(data) {
-            trip.harData.gps = data;
-            deferred.resolve(trip.harData.gps);
+            trip.data.gps = data;
+            deferred.resolve(trip.data.gps);
           })
           .error(function(data, status, headers, config) {
             console.warn("Failed fetching gps data");

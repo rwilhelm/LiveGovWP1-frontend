@@ -63,26 +63,20 @@
 				// min and max sensor data for the y-axis. see Config.xDomain() and
 				// Config.yDomain())
 
-				var tags = trip.harData.tags;
-				var count = trip.sensorData.count;
-				var gps = trip.harData.gps;
-				var geo = trip.harData.geo;
+				var har = trip.data.har;
+				var count = trip.dataCount;;
+				var gps = trip.data.gps;
+				var fc = trip.data.fc;
 
-				if (!count.acc) Data.count(trip);
-				// if (!gps.length) Data.gps(trip);
-				// if (!tags.length) Data.har(trip);
-				// if (!geo.features) Data.geo(trip);
+				if (!count.acc) Data.count(trip); // FIXME create helper to count that
 
-				if (!gps.length || !tags.length || !geo.features.length) {
-					Data.gps(trip)
-					.then(Data.har(trip))
-					.then(Data.geo(trip));
-				}
+				if (!gps.length) Data.gps(trip);
+				if (!har.length) Data.har(trip);
 
 				Data.sensor(trip, obj).then(function(data) {
 					data.forEach(function(sensor) {
 						sensor.forEach(function(c, i, a) {
-							c.tag = tags.filter(function(d) {
+							c.tag = har.filter(function(d) {
 								if (c.ts >= +d[0] && c.ts <= +d[1]) {
 									console.log(c.ts, +d[0], +d[1], d[2], "XXX CHECK ME XXX");
 								}
@@ -90,8 +84,6 @@
 							}).map(function(d) { return d[2]; })[0]; // argh, whats happening here?
 						});
 					});
-					trip.sensorData.xDomain = data.calculateExtent(Config.xDomain());
-					trip.sensorData.yDomain = data.calculateExtent(Config.yDomain());
 					console.info('done:', trip);
 				});
 			},
@@ -108,9 +100,8 @@
 			// test if trip data is loaded
 			hasData: function(trip) {
 				if (!arguments.length) return;
-				var sensors = trip.sensorData.sensors;
 				return Config.sensors()
-					.map(function (sensor) { return sensors[sensor].length; })
+					.map(function (sensor) { return trip.data[sensor].length; })
 					.reduce(function (a, b) { return a + b; });
 			},
 
@@ -135,7 +126,7 @@
 			},
 
 			reset: function (trip) {
-				Config.sensors().map(function (sensor) { trip.data.sensors[sensor] = []; });
+				Config.sensors().map(function (sensor) { trip.data[sensor] = []; });
 				trip.extent = [];
 				this.loadData(trip);
 			},
@@ -175,7 +166,7 @@
 					Data.count(trip, sensor)
 					.then(function(data) {
 						console.log(data);
-						trip.data.count[sensor] = +data[0].count;
+						trip.dataCount[sensor] = +data[0].count;
 					});
 				});
 			}
