@@ -17,25 +17,13 @@
 
           function renderComponent() {
             React.renderComponent(
-              SensorChart({
-                data  : $scope.trip.sensorData.sensors[$scope.sensor],
-                extent: $scope.trip.sensorData.extent,
-                xDomain: $scope.trip.sensorData.xDomain,
-                yDomain: $scope.trip.sensorData.yDomain,
-                height: 200, // $element[0].offsetHeight || 200, // FIXME
+              RawView({
+                scope: $scope,
                 width: $element[0].offsetWidth,
                 loadMoreData: function(extent, oldExtent) {
                   console.log('chartDirective:loadMoreData', extent, oldExtent);
                   $scope.loadMoreData({extent: extent, oldExtent: oldExtent});
                 },
-                // updateExtent: function(extent) {
-                //   console.log('chartDirective:updateExtent');
-                //   $scope.updateExtent({extent: extent});
-                // },
-                // onChange: handleChanges(function(extent) {
-                //   $scope.trip.data.extent = extent;
-                //   $scope.$apply();
-                // }
               }), $element[0]
             );
           }
@@ -49,12 +37,18 @@
             );
           }
 
-          $scope.$watch('trip.sensorData', function(val, oldVal) {
+          $scope.$watchCollection('trip.sensorData', function(val, oldVal) {
             if (tripIsReady()) {
-              console.log('chartDirective:' + $scope.sensor + ':$watch', val, oldVal);
-              renderComponent();
+              if (val.extent.length) {
+                if (val.extent !== oldVal.extent) {
+                  console.log('chartDirective:' + $scope.sensor + ':$watch', val.extent, oldVal.extent);
+                  renderComponent();
+                }
+              } else {
+                renderComponent();
+              }
             }
-          }, true);
+          });
         }
       };
     }
