@@ -17,16 +17,12 @@
           function renderComponent() {
             React.renderComponent(
               RawView({
-                scope: $scope,
-                width: $element[0].offsetWidth,
-                loadMoreData: function(extent, oldExtent) {
-                  console.log('chartDirective:loadMoreData', extent, oldExtent);
-                  $scope.loadMoreData({extent: extent, oldExtent: oldExtent});
 
                 // TODO can i trigger $scope changes from within react
                 // components? should i?
                 // scope: $scope,
 
+                data: $scope.trip.data,
                 onBrush: function(extent, oldExtent) {
                   console.log('chartDirective:onBrush', extent, oldExtent);
                   $scope.onBrush({extent: extent, oldExtent: oldExtent});
