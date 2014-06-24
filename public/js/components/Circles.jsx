@@ -41,9 +41,9 @@ var Circles = React.createClass({
 
     var r = 1.2;
     var offset = this.props.offset;
-   	var circles = this.props.data.map(function(d) {
+   	var circles = this.props.data.map(function(d,i) {
    		return (
- 			  <circle transform={offset} cx={d[0]} cy={d[1]} r={r} className="circle"/>
+ 			  <circle key={i} transform={offset} cx={d[0]} cy={d[1]} r={r} className="circle"/>
    		)
    	});
 
