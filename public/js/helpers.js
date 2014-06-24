@@ -137,5 +137,46 @@
   //        d - 2483620;
   // };
 
+  // TODO -> helpers
+  // function calculateDistance(a, b) {
+  //   return gju.pointDistance({
+  //     type: 'Point',
+  //     coordinates: a
+  //   }, {
+  //     type: 'Point',
+  //     coordinates: b
+  //   });
+  // }
+
+  // // TODO -> helpers
+  // // get array element which occures the most
+  // function getMaxOccurrence(array) {
+  //   if (!array.length) return null;
+  //   var len = array.length;
+  //   var modeMap = {};
+  //   var maxEl = array[0];
+  //   var maxCount = 1;
+  //   for (var i = 0; i < len; i++) {
+  //     var el = array[i];
+  //     if (modeMap[el] === null) modeMap[el] = 1;
+  //     else modeMap[el]++;
+  //     if (modeMap[el] > maxCount) {
+  //       maxEl = el;
+  //       maxCount = modeMap[el];
+  //     }
+  //   }
+  //   return maxEl;
+  // }
+
+  // // TODO -> helpers
+  // function topActivity(har, t0, t1) {
+  //   return getMaxOccurrence(har.map(function (d) {
+  //     if (d.ts >= t0 && d.ts <= t1) { // get tags between t0 and t1
+  //       return d.tag.replace(/\"/g, ""); // remove quotes
+  //     }}).filter(function (d) { return d; }) // remove undefined
+  //   );
+  // }
+
+
 
 }())
