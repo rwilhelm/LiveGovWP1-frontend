@@ -1,6 +1,10 @@
 (function() {
   'use strict';
 
+  ///////////////////////////////////////////////////////////
+  // TODO NAMESPACE THIS!!! XXX IMPORTANT ATTENTION PLEASE //
+  ///////////////////////////////////////////////////////////
+
   /* GENERAL */
 
   // flatten an array
@@ -66,10 +70,21 @@
   };
 
   Array.prototype.unique = function() {
-      var o = {}, i, l = this.length, r = [];
-      for(i=0; i<l;i+=1) o[this[i]] = this[i];
-      for(i in o) r.push(o[i]);
-      return r;
+    var o = {}, i, l = this.length, r = [];
+    for(i=0; i<l;i+=1) o[this[i]] = this[i];
+    for(i in o) r.push(o[i]);
+    return r;
+  };
+
+  // warning: will fail if there are non-arrays in there. FIXME!
+  Object.prototype.arrayLengthSum = function() { // horrible name
+    Object.keys(this)
+    .map(function(key) {
+      return this[key].length;
+    })
+    .reduce(function(a,b) {
+      return a + b;
+    });
   };
 
   // Object.prototype.getById = function(id) {
@@ -87,7 +102,7 @@
   //   // };
   // };
 
-  // FIXME abstract
+  // TODO abstract
   // calculate the most popular tag between t0 and t1
   function topActivity(har, t0, t1) {
     return getMaxOccurrence(har.map(function (d) {
@@ -95,6 +110,10 @@
         return d.tag.replace(/\"/g, ""); // remove quotes
       }}).filter(function (d) { return d; }) // remove undefined
     );
+  }
+
+  function countActivities(harTags, t0, t1) {
+
   }
 
   /* SENSOR DATA */
@@ -121,7 +140,7 @@
 
   /* D3 */
 
-  Array.prototype.calculateExtent = function(a) {  // e.g. ['avgx, avgy, avgz']
+  Array.prototype.extent = function(a) {  // e.g. ['avgx, avgy, avgz']
     return d3.extent(this.select(a)).map(function(d) {
       return +d;
     });

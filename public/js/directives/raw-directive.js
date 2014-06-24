@@ -1,5 +1,5 @@
-/* jshint strict:true, devel:true, debug:true */
-/* global angular, app */
+/* jshint strict:true, devel:true, debug:true, newcap:false */
+/* global angular, app, RawView */
 
 /* Fri Jun 20 03:28:04 CEST 2014 */
 /* vi:set ft=javascript,tw=78 */
@@ -22,6 +22,11 @@
                 loadMoreData: function(extent, oldExtent) {
                   console.log('chartDirective:loadMoreData', extent, oldExtent);
                   $scope.loadMoreData({extent: extent, oldExtent: oldExtent});
+
+                // TODO can i trigger $scope changes from within react
+                // components? should i?
+                // scope: $scope,
+
                 onBrush: function(extent, oldExtent) {
                   console.log('chartDirective:onBrush', extent, oldExtent);
                   $scope.onBrush({extent: extent, oldExtent: oldExtent});

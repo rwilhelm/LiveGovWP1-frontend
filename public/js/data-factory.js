@@ -42,7 +42,7 @@
           .success(function(data, status, headers, config) {
 
             // set up trip object architecture (very fragile! change something
-            // here and it'll break all over the place. fixable? FIXME)
+            // here and it'll break all over the place. fixable? TODO)
             trips = data.map(function(d) {
               var trip = {
                 id        : d.trip_id,
@@ -154,7 +154,7 @@
             deferred.resolve(trip.data.har);
           })
           .error(function (data, status, headers, config) {
-            console.warn('Failed fetching har tags');
+            console.warn('Failed fetching har har');
             deferred.reject();
           });
         }
