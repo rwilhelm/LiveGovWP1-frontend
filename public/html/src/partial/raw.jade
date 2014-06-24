@@ -14,22 +14,26 @@ div(ng-controller="tripCtrl as ctrl")
       //-     trip-info(data='trip')
 
       .row
-        .col-xs-11
-          chart(trip='trip', sensor='gra', load-More-Data="loadMoreData(extent, oldExtent)")
-        .col-xs-1
-          chart-info(trip='trip', sensor='gra', name='Gravity')
+        .col-xs-12
+          raw(trip='trip', sensors='acc,gra,lac', load-More-Data="loadMoreData(extent, oldExtent)")
 
-      .row
-        .col-xs-11
-          chart(trip='trip', sensor='acc', load-More-Data="loadMoreData(extent, oldExtent)")
-        .col-xs-1
-          chart-info(trip='trip', sensor='acc', name='Acceleration')
+      //- .row
+      //-   .col-xs-11
+      //-     chart(trip='trip', sensor='gra', load-More-Data="loadMoreData(extent, oldExtent)")
+      //-   .col-xs-1
+      //-     chart-info(trip='trip', sensor='gra', name='Gravity')
 
-      .row
-        .col-xs-11
-          chart(trip='trip', sensor='lac', load-More-Data="loadMoreData(extent, oldExtent)")
-        .col-xs-1
-          chart-info(trip='trip', sensor='lac', name='Linear Acceleration')
+      //- .row
+      //-   .col-xs-11
+      //-     chart(trip='trip', sensor='acc', load-More-Data="loadMoreData(extent, oldExtent)")
+      //-   .col-xs-1
+      //-     chart-info(trip='trip', sensor='acc', name='Acceleration')
+
+      //- .row
+      //-   .col-xs-11
+      //-     chart(trip='trip', sensor='lac', load-More-Data="loadMoreData(extent, oldExtent)")
+      //-   .col-xs-1
+      //-     chart-info(trip='trip', sensor='lac', name='Linear Acceleration')
 
     #bottom
       //- minimap(trip="trip", handle-Changes='handleChanges(extent, oldExtent)')

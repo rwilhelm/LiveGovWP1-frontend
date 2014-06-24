@@ -3,7 +3,7 @@
 var SensorChart = React.createClass({
 
   propTypes: {
-    data         : React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    // data         : React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
     extent       : React.PropTypes.arrayOf(React.PropTypes.number),
     height       : React.PropTypes.number.isRequired,
     loadMoreData : React.PropTypes.func.isRequired,
@@ -19,17 +19,17 @@ var SensorChart = React.createClass({
   // mounting occurs. Initialization that requires DOM nodes should go here.
 
   getInitialState: function() {
-    console.log('SensorChart:getInitialState', this.props);
+    console.log('SensorChart:getInitialState' + this.props.sensor);
     return {extent: []};
   },
 
   componentWillMount: function() {
-    console.log('SensorChart:componentWillMount', this.props);
+    console.log('SensorChart:componentWillMount' + this.props.sensor);
     // this.setState({width: 10, height: 10 / 4});
   },
 
   componentDidMount: function() {
-    console.log('SensorChart:componentDidMount', this.props);
+    console.log('SensorChart:componentDidMount' + this.props.sensor);
     window.addEventListener("resize", this.updateDimensions);
     // this.setProps({
     //   width: this.getDOMNode().offsetWidth,
@@ -51,30 +51,31 @@ var SensorChart = React.createClass({
   // immediately after updating occurs.
 
   componentWillReceiveProps: function(nextProps) {
-    console.warn('SensorChart.jsx:componentWillReceiveProps', this.props.extent, nextProps.extent);
-    this.props.extent = nextProps.extent;
-    this.setState({
-      extent: nextProps.extent != this.props.extent ? nextProps.extent : []
-    })
+    console.warn('SensorChart.jsx:componentWillReceiveProps' + this.props.sensor);
+    // disable this and the chart wont zoom anymore
+    // if (nextProps.extent !== this.props.extent) this.setState({extent:nextProps.extent});
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
+    console.log('SensorChart.jsx:shouldComponentUpdate' + this.props.sensor);
+    // console.log(this.state.extent, this.props.extent, nextState.extent, nextProps.extent);
+    if (this.state.extent == nextState.extent) return false;
     return true;
   },
 
   componentWillUpdate: function(nextProps, nextState) {
-    console.log('SensorChart.jsx:componentWillUpdate', nextProps, nextState);
+    console.log('SensorChart.jsx:componentWillUpdate' + this.props.sensor);
   },
 
   componentDidUpdate: function(prevProps, prevState) {
-    console.log('SensorChart.jsx:componentDidUpdate', prevProps, prevState);
+    console.log('SensorChart.jsx:componentDidUpdate' + this.props.sensor);
   },
 
   // Unmounting [8] componentWillUnmount() is invoked immediately before a
   // component is unmounted and destroyed. Cleanup should go here.
 
   componentWillUnmount: function() {
-    console.log('SensorChart.jsx:componentWillMount', this.props);
+    console.log('SensorChart.jsx:componentWillMount' + this.props.sensor);
     // window.removeEventListener("resize", this.updateDimensions);
   },
 
@@ -115,11 +116,20 @@ var SensorChart = React.createClass({
     };
   },
 
+  loadMoreData: function (extent) {
+    console.log('SensorChart.jsx:loadMoreData');
+    // this.setState({extent:extent});
+    this.setState({extent:extent});
+    // console.log(this.state.extent);
+    // FIXME only communicate with directive if neccesary
+    // this.props.loadMoreData(extent, extent); // communication with the outside world (angular)
+  },
+
   render: function() {
+    console.log('SensorChart.jsx:render' + this.props.sensor);
     var data = this.props.data;
     var width = this.props.width;
     var height = this.props.height;
-    var extent = this.props.extent;
     var offset = this.props.offset; // g element
     var xDomain = this.props.xDomain;
     var yDomain = this.props.yDomain;
@@ -128,9 +138,10 @@ var SensorChart = React.createClass({
     var axisLabel = this.props.axisLabel;
     var loadMoreData = this.loadMoreData;
 
-    var size = {width: width, height: height} // all children of g
-    var innerSize = {width: innerWidth, height: innerHeight}
+    var extent = this.state.extent;
 
+    var size = {width: width, height: height}; // all children of g
+    var innerSize = {width: innerWidth, height: innerHeight};
     var xScale = d3.time.scale().range([0, innerWidth]);
     var yScale = d3.scale.linear().range([innerHeight, 0]);
 
@@ -138,8 +149,8 @@ var SensorChart = React.createClass({
     yScale.domain(yDomain);
 
     var line = d3.svg.line().interpolate("linear")
-      .x(function(d) { return xScale(d[0]) })  // d[0]: Number timestamp
-      .y(function(d) { return yScale(d[1]) }); // d[1]: Number sensor value
+      .x(function(d) { return xScale(d[0]); })  // d[0]: Number timestamp
+      .y(function(d) { return yScale(d[1]); }); // d[1]: Number sensor value
 
     function pathData(val) { // String sensor key
       return line(data.dataSeries(['ts', val])); // -> helper
@@ -157,22 +168,18 @@ var SensorChart = React.createClass({
     // }
 
     return (
-      <Chart size={innerSize} offset={offset} extent={extent} xDomain={xDomain} yDomain={yDomain} axisLabel={axisLabel}>
-        <Path data={pathData('x')} size={size} offset={offset} className="path pathx"/>
-        <Path data={pathData('y')} size={size} offset={offset} className="path pathy"/>
-        <Path data={pathData('z')} size={size} offset={offset} className="path pathz"/>
-        <Circles data={circlesData('x')} className="circle circlex"/>
-        <Circles data={circlesData('y')} className="circle circley"/>
-        <Circles data={circlesData('z')} className="circle circlez"/>
-        <Brush size={size} extent={extent} xDomain={xDomain} yDomain={yDomain} loadMoreData={loadMoreData} className="brush"/>
-      </Chart>
+      <div ref={this.props.sensor + "SensorChart"}>
+        <ChartInfo ref="chartInfo" extent={extent} sensor={this.props.sensor}/>
+        <Chart ref={this.props.sensor + "Chart"} size={innerSize} offset={offset} extent={extent} xDomain={xDomain} yDomain={yDomain} axisLabel={axisLabel} sensor={this.props.sensor}>
+          <Path ref="circleX" data={pathData('x')} size={size} offset={offset} className="path pathx"/>
+          <Path ref="circleY" data={pathData('y')} size={size} offset={offset} className="path pathy"/>
+          <Path ref="circleZ" data={pathData('z')} size={size} offset={offset} className="path pathz"/>
+          <Circles ref="circleX" data={circlesData('x')} className="circle circlex"/>
+          <Circles ref="circleY" data={circlesData('y')} className="circle circley"/>
+          <Circles ref="circleZ" data={circlesData('z')} className="circle circlez"/>
+          <Brush ref="brush" size={size} extent={extent} xDomain={xDomain} yDomain={yDomain} loadMoreData={this.loadMoreData} className="brush" sensor={this.props.sensor}/>
+        </Chart>
+      </div>
     );
-  },
-
-  loadMoreData: function (extent) {
-    console.log('SensorChart.jsx:loadMoreData', extent);
-    this.setState({extent: extent});
-    // FIXME only communicate with directive if neccesary
-    // this.props.loadMoreData(extent, extent);
   }
 });
