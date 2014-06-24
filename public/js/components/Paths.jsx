@@ -1,5 +1,5 @@
 /*** @jsx React.DOM */
-
+// DEFUNKT
 var Paths = React.createClass({
   getDefaultProps: function() {
     return {

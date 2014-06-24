@@ -1,5 +1,5 @@
 /*** @jsx React.DOM */
-
+// DEFUNKT!
 var Circle = React.createClass({
 
 	renderCircles: function() {
