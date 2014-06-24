@@ -28,14 +28,15 @@
         var deferred = $q.defer();
 
         if (trips.length) {
+          console.log('dataFactory:trips XHR NOT!');
           deferred.resolve(trips);
         } else {
+          console.log('dataFactory:trips XHR');
 
           // do the xhr request on 'trips' to get the trip list and immediately
           // return a promise on the to be received and prepared data. see
           // this.query() in the record controller (recCtrl).
 
-          console.log('xhr: trips');
 
           $http.get('api/trips')
           .success(function(data, status, headers, config) {
@@ -50,7 +51,11 @@
                 duration: +d.stop_ts - (+d.start_ts) - 3600000, // FIXME -1h wrong ts in db
                 love: false, // TODO use local storage
 
-                // watch this
+                // watch this in chart-directive (FIXME less is more! only extent!)
+                // (r) = react, (a) = angular, (d3) = d3
+                //
+                // (d3)brush -> (d3)extent -> (r)loadMoreData(FIXME!onChange?) -> (a)chartDirective -> controller(scope)
+                //
                 sensorData: {
                   count: {},
                   extent: [],
@@ -88,6 +93,8 @@
       // Config.sensors() should be job ob the calling method REALLY? BUT HOW
       // TO CHECK THEN IF ALL SENSOR DATA HAS ARRIVED?
       sensor: function (trip, sensor, obj) {
+        console.log('dataFactory:sensor XHR');
+
         var promises = Config.sensors().map(function(sensor) {
           var deferred = $q.defer();
           $http({
@@ -120,6 +127,8 @@
       // FIXME should load count for one sensor only. iterating above
       // Config.sensors() should be job ob the calling method
       count: function (trip, sensor, obj) {
+        console.log('dataFactory:count XHR');
+
         var promises = Config.sensors().map(function(sensor) {
           var deferred = $q.defer();
 
@@ -139,6 +148,8 @@
 
       // ok
       har: function(trip) {
+        console.log('dataFactory:har XHR');
+
         var deferred = $q.defer();
         if (trip.harData.tags.length) {
           deferred.resolve(trip.harData.tags);
@@ -164,6 +175,8 @@
 
       // ok
       gps: function(trip) {
+        console.log('dataFactory:gps XHR');
+
         var deferred = $q.defer();
         if (trip.harData.gps.length) {
           deferred.resolve(trip.harData.gps); // resolve old trip data
@@ -183,6 +196,7 @@
 
       // load har and gps data, return feature collection
       geo: function(trip) {
+        console.log('dataFactory:geo XHR');
 
         // TODO -> helpers
         function calculateDistance(a, b) {
@@ -244,16 +258,16 @@
           "features": []
         };
 
-        var gps = this.gps(trip);
+        var gps = this.gps(trip); // same as Data.gps(trip) for the outside world.
         var har = this.har(trip);
 
         $q.all([gps, har]).then(function(data) {
-          var gps = data[0];
-          var har = data[1];
+          var gps = trip.harData.gps;
+          var har = trip.harData.tags; // FIXME refactor vars
           var gpsLength = gps.length;
           var harLength = har.length;
 
-          var n = 0;
+          // var n = 0;
 
           // FIXME -> HELPERS
           for (var i = gpsLength - 1; i >= 0; --i) {

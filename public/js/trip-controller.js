@@ -117,12 +117,15 @@ app.controller('tripCtrl',
 
   $scope.loadMoreData = function(extent, oldExtent) {
     console.log('tripCtrl:loadMoreData', extent, oldExtent);
-    // load more data only if we're zooming in
-    var extentSize = extent.reduce(function(a,b) { return b-a; }, 0);
-    var oldExtentSize = oldExtent.reduce(function(a,b) { return b-a; }, 0);
+
+    // apply the new extent to the $scope
     $scope.$apply(function() {
       $scope.trip.sensorData.extent = extent;
     });
+
+    // load more data only if we're zooming in
+    var extentSize = extent.reduce(function(a,b) { return b-a; }, 0);
+    var oldExtentSize = oldExtent.reduce(function(a,b) { return b-a; }, 0);
 
     if (extentSize === 0) {
       console.log('Zoom reset: not loading more data');

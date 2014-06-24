@@ -68,28 +68,18 @@
 				var gps = trip.harData.gps;
 				var geo = trip.harData.geo;
 
-				if (!count.acc) {
-					console.log('xhr: count');
-					Data.count(trip);
-				}
+				if (!count.acc) Data.count(trip);
+				// if (!gps.length) Data.gps(trip);
+				// if (!tags.length) Data.har(trip);
+				// if (!geo.features) Data.geo(trip);
 
-				if (!tags.length) {
-					console.log('xhr: har');
-					Data.har(trip);
-				}
-
-				if (!gps.length) {
-					console.log('xhr: gps');
-					Data.gps(trip);
-				}
-
-				if (!geo.features) {
-					console.log('xhr: geo');
-					Data.geo(trip);
+				if (!gps.length || !tags.length || !geo.features.length) {
+					Data.gps(trip)
+					.then(Data.har(trip))
+					.then(Data.geo(trip));
 				}
 
 				Data.sensor(trip, obj).then(function(data) {
-					console.log('xhr: sensor');
 					data.forEach(function(sensor) {
 						sensor.forEach(function(c, i, a) {
 							c.tag = tags.filter(function(d) {
