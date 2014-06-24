@@ -2,17 +2,6 @@
 
 var RawView = React.createClass({
 
-	getDefaultProps: function() {
-		var scope = this.props.scope;
-		var trip = scope.trip;
-		var sensorData = scope.trip.sensorData;
-		var sensors = sensorData.sensors;
-
-		var data = {
-			acc: sensors.acc,
-			lac: sensors.lac,
-			gra: sensors.gra,
-		};
 	generateFeatureCollection: function(gpsData, harTags) {
 	  console.log('RawView:generateFeatureCollection');
 
@@ -62,21 +51,32 @@ var RawView = React.createClass({
 
 	},
 
-		var extent = sensorData.extent; // actually not sensorData
-		var xDomain = sensorData.xDomain;
-		var yDomain = sensorData.yDomain;
+	compressHarTags: function (harTags) {
 
-		var loadMoreData = scope.loadMoreData;
+	},
+
+	// calculate x and y domain
+	getDomains: function() {
+		return {
+			xDomain: this.props.data.extent(['starttime', 'endtime']),
+			yDomain: this.props.data.extent(['x', 'y', 'z'])
+		}
+	},
+
+	// get width and height of the parent container
+	getContainerSize: function() {
+
+	},
+
+	getDefaultProps: function() {
+		var data = this.props.data;
+		var onBrush = this.props.onBrush;
 
 		return {
 			data: data,
-			extent: extent,
-			height: 200,
-			width: this.props.width, // TODO calculate width here
-			xDomain: xDomain,
-			yDomain: yDomain,
-			loadMoreData: scope.loadMoreData,
-			sensor: scope.sensor,
+			height: 200, // TODO make height dynamic
+			width: 500, // TODO calculate width here
+			onBrush: this.props.onBrush,
 		}
 	},
 
@@ -86,12 +86,23 @@ var RawView = React.createClass({
 		};
 	},
 
+	componentDidMount: function() {
+		this.getContainerSize();
+		this.getDomains();
+		this.compressHarTags(this.props.data.har);
+		this.generateFeatureCollection(this.props.data.gps, this.props.data.har)
+	},
+
 	render: function() {
+
+		var xDomain = this.getDomains().xDomain;
+		var yDomain = this.getDomains().yDomain;
+
 		return (
 			<div>
-				<SensorChart ref="graChart" data={this.props.data.gra} extent={this.props.extent} height={this.props.height} width={this.props.width} xDomain={this.props.xDomain} yDomain={this.props.yDomain} loadMoreData={this.props.loadMoreData}/>
-				<SensorChart ref="accChart" data={this.props.data.acc} extent={this.props.extent} height={this.props.height} width={this.props.width} xDomain={this.props.xDomain} yDomain={this.props.yDomain} loadMoreData={this.props.loadMoreData}/>
-				<SensorChart ref="lacChart" data={this.props.data.lac} extent={this.props.extent} height={this.props.height} width={this.props.width} xDomain={this.props.xDomain} yDomain={this.props.yDomain} loadMoreData={this.props.loadMoreData}/>
+				<SensorChart ref="graChart" data={this.props.data.gra} extent={this.state.extent} height={this.props.height} width={this.props.width} xDomain={xDomain} yDomain={yDomain} onBrush={this.props.onBrush}/>
+				<SensorChart ref="accChart" data={this.props.data.acc} extent={this.state.extent} height={this.props.height} width={this.props.width} xDomain={xDomain} yDomain={yDomain} onBrush={this.props.onBrush}/>
+				<SensorChart ref="lacChart" data={this.props.data.lac} extent={this.state.extent} height={this.props.height} width={this.props.width} xDomain={xDomain} yDomain={yDomain} onBrush={this.props.onBrush}/>
 			</div>
 		);
 	}
