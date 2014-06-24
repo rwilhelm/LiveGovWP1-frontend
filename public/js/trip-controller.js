@@ -115,8 +115,8 @@ app.controller('tripCtrl',
     return ($route.current && $route.current.name == loc);
   };
 
-  $scope.loadMoreData = function(extent, oldExtent) {
-    console.log('tripCtrl:loadMoreData', extent, oldExtent);
+  $scope.onBrush = function(extent, oldExtent) {
+    console.log('tripCtrl:onBrush', extent, oldExtent);
 
     // apply the new extent to the $scope
     $scope.$apply(function() {

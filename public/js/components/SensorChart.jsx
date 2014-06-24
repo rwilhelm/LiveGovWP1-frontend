@@ -3,13 +3,13 @@
 var SensorChart = React.createClass({
 
   propTypes: {
-    // data         : React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
-    extent       : React.PropTypes.arrayOf(React.PropTypes.number),
-    height       : React.PropTypes.number.isRequired,
-    loadMoreData : React.PropTypes.func.isRequired,
-    width        : React.PropTypes.number.isRequired,
-    xDomain      : React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
-    yDomain      : React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
+    // data    : React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
+    extent  : React.PropTypes.arrayOf(React.PropTypes.number),
+    height  : React.PropTypes.number.isRequired,
+    onBrush : React.PropTypes.func.isRequired,
+    width   : React.PropTypes.number.isRequired,
+    xDomain : React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
+    yDomain : React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
   },
 
   getInitialState: function() {
@@ -94,8 +94,8 @@ var SensorChart = React.createClass({
     };
   },
 
-  loadMoreData: function (extent) {
-    console.log('SensorChart.jsx:loadMoreData');
+  onBrush: function (extent) {
+    console.log('SensorChart.jsx:onBrush');
     // this.setState({extent:extent});
     this.setState({extent:extent});
     // this.props.loadMoreData(extent, extent); // communication with the outside world (angular)
@@ -112,7 +112,7 @@ var SensorChart = React.createClass({
     var innerWidth = this.props.innerWidth;
     var innerHeight = this.props.innerHeight;
     var axisLabel = this.props.axisLabel;
-    var loadMoreData = this.loadMoreData;
+    var onBrush = this.onBrush;
 
     var extent = this.state.extent;
 
@@ -148,7 +148,7 @@ var SensorChart = React.createClass({
           <Circles ref="circleX" data={circlesData('x')} className="circle circlex"/>
           <Circles ref="circleY" data={circlesData('y')} className="circle circley"/>
           <Circles ref="circleZ" data={circlesData('z')} className="circle circlez"/>
-          <Brush ref="brush" size={size} extent={extent} xDomain={xDomain} yDomain={yDomain} loadMoreData={this.loadMoreData} className="brush" sensor={this.props.sensor}/>
+          <Brush ref="brush" size={size} extent={extent} xDomain={xDomain} yDomain={yDomain} onBrush={this.onBrush} className="brush" sensor={this.props.sensor}/>
         </Chart>
       </div>
     );

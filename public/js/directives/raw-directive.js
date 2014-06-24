@@ -11,7 +11,7 @@
     function () {
       return {
         restrict: 'E',
-        scope: { trip: '=', sensors: '@', loadMoreData: '&', updateExtent: '&' },
+        scope: { trip: '=', sensors: '@', onBrush: '&' },
         link: function($scope, $element, $attributes) {
           console.log('chartDirective:', $scope.sensors);
           function renderComponent() {
@@ -22,6 +22,9 @@
                 loadMoreData: function(extent, oldExtent) {
                   console.log('chartDirective:loadMoreData', extent, oldExtent);
                   $scope.loadMoreData({extent: extent, oldExtent: oldExtent});
+                onBrush: function(extent, oldExtent) {
+                  console.log('chartDirective:onBrush', extent, oldExtent);
+                  $scope.onBrush({extent: extent, oldExtent: oldExtent});
                 },
               }), $element[0]
             );
