@@ -1,15 +1,6 @@
 /*** @jsx React.DOM */
 
 var Brush = React.createClass({
-	update:function(modifiedValue){
-		this.setState({value: modifiedValue});
-	},
-	// getInitialState: function() {
-	// 	return {
-	// 		extent: this.props.extent
-	// 	};
-	// },
-
   loadMoreData: function(extent) {
     // this.setState({ extent: extent });
     console.log('Brush.jsx:loadMoreData' + this.props.sensor);
@@ -17,19 +8,6 @@ var Brush = React.createClass({
     // return this.props.loadMoreData(extent, this.props.extent);
   },
 
-  componentWillReceiveProps: function(nextProps) {
-    console.log('Brush.jsx:componentWillReceiveProps' + this.props.sensor);
-  },
-
-  componentWillUpdate: function(nextProps, nextState) {
-    console.log('Brush.jsx:componentWillUpdate' + this.props.sensor);
-  },
-
-  // brush: function() {
-  //   var brush = d3.svg.brush();
-
-  // },
-  
 	componentDidMount: function() {
     var xScale = d3.time.scale()
       .range([0, this.props.size.width]);
@@ -57,41 +35,12 @@ var Brush = React.createClass({
       .attr("class", "brush")
       .call(brush)
       .selectAll("rect")
-      .attr("height", this.props.size.height - 72); // FIXME
-
+      .attr("height", this.props.size.height - 72); // TODO
 	},
-
-
-	componentWillReceiveProps: function(nextProps) {
-		console.log('Brush.jsx:componentWillReceiveProps:' + this.props.sensor);
-		// this.setState({
-		// 	extent: nextProps.extent
-		// })
-	},
-
-
-	componentWillUpdate: function(nextProps, nextState) {
-		console.log('Brush.jsx:componentWillUpdate:' + this.props.sensor);
-	},
-
-
-	componentDidUpdate: function(prevProps, prevState) {
-		console.log('Brush.jsx:componentDidUpdate:' + this.props.sensor);
-    d3.selectAll('chart').select('.brush').call(brush.clear());
-	},
-
 
   brushended: function(brush) {
-  	// this.props.extent = brush.empty() ? [] : brush.extent().map(function(d) { return +d; });
-    // loadMoreData(brush.empty() ? [] : brush.extent().map(function(d) { return +d; }));
-    // this.loadMoreData(brush.extent().map(function(d) { return +d; }));
     this.loadMoreData(brush.empty() ? [] : brush.extent().map(function(d) { return +d; }));
-    // this.props.extent.bind(this) = brush.empty() ? [] : brush.extent().map(function(d) { return +d; });
-    // this.props.extent.bind(this) = brush.empty() ? [] : brush.extent().map(function(d) { return +d; });
-    // console.log('Brush.jsx:brushended': this.props.extent);
-    // this.loadMoreData.bind(this, brush.empty() ? [] : brush.extent().map(function(d) { return +d; }), brush.extent().map(function(d) { return +d; }));
-    // that.setState({extent: brush.empty() ? [] : brush.extent().map(function(d) { return +d; })});
-    // dispatch.brushended(brush.empty() ? [] : brush.extent().map(function(d) { return +d; }));
+    d3.selectAll('chart').select('.brush').call(brush.clear());
   },
 
 	render: function() {
@@ -99,5 +48,4 @@ var Brush = React.createClass({
 			<g />
 		);
 	}
-
 });

@@ -1,13 +1,6 @@
 /*** @jsx React.DOM */
 
 var Chart = React.createClass({
-  propTypes: {
-    // size.width: React.PropTypes.number.isRequired,
-    // size.height: React.PropTypes.number.isRequired,
-    // offset.y: React.PropTypes.number.isRequired,
-    // offset.x: React.PropTypes.number.isRequired
-  },
-
   getDefaultProps: function() {
     var xScale = d3.time.scale().range([0, this.props.size.width]);
     var yScale = d3.scale.linear().range([this.props.size.height, 0]);

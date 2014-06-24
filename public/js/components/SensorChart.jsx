@@ -12,12 +12,6 @@ var SensorChart = React.createClass({
     yDomain      : React.PropTypes.arrayOf(React.PropTypes.number).isRequired,
   },
 
-  // Mounting [1] getInitialState(): object is invoked before a component is
-  // mounted. Stateful components should implement this and return the initial
-  // state data. [2] componentWillMount() is invoked immediately before
-  // mounting occurs. [3] componentDidMount() is invoked immediately after
-  // mounting occurs. Initialization that requires DOM nodes should go here.
-
   getInitialState: function() {
     console.log('SensorChart:getInitialState' + this.props.sensor);
     return {extent: []};
@@ -36,19 +30,6 @@ var SensorChart = React.createClass({
     //   // height: this.getDOMNode().offsetHeight / 4
     // });
   },
-
-  // Updating [4] componentWillReceiveProps(object nextProps) is invoked when
-  // a mounted component receives new props. This method should be used to
-  // compare this.props and nextProps to perform state transitions using
-  // this.setState(). [5] shouldComponentUpdate(object nextProps, object
-  // nextState): boolean is invoked when a component decides whether any
-  // changes warrant an update to the DOM. Implement this as an optimization
-  // to compare this.props with nextProps and this.state with nextState and
-  // return false if React should skip updating. [6]
-  // componentWillUpdate(object nextProps, object nextState) is invoked
-  // immediately before updating occurs. You cannot call this.setState() here.
-  // [7] componentDidUpdate(object prevProps, object prevState) is invoked
-  // immediately after updating occurs.
 
   componentWillReceiveProps: function(nextProps) {
     console.warn('SensorChart.jsx:componentWillReceiveProps' + this.props.sensor);
@@ -71,17 +52,14 @@ var SensorChart = React.createClass({
     console.log('SensorChart.jsx:componentDidUpdate' + this.props.sensor);
   },
 
-  // Unmounting [8] componentWillUnmount() is invoked immediately before a
-  // component is unmounted and destroyed. Cleanup should go here.
-
   componentWillUnmount: function() {
     console.log('SensorChart.jsx:componentWillMount' + this.props.sensor);
     // window.removeEventListener("resize", this.updateDimensions);
   },
 
-  // updateDimensions: function() {
-  //   // this.setState({width: this.getDOMNode().offsetWidth, height: this.getDOMNode().offsetHeight / 4});
-  // },
+  updateDimensions: function() {
+    this.setState({width: this.getDOMNode().offsetWidth, height: this.getDOMNode().offsetHeight / 4}); // TODO
+  },
 
   getDefaultProps: function() {
     var margin = {top: 4, right: 4, bottom: 52 + 4 + 13, left: 26 }; // i will never remember
@@ -120,8 +98,6 @@ var SensorChart = React.createClass({
     console.log('SensorChart.jsx:loadMoreData');
     // this.setState({extent:extent});
     this.setState({extent:extent});
-    // console.log(this.state.extent);
-    // FIXME only communicate with directive if neccesary
     // this.props.loadMoreData(extent, extent); // communication with the outside world (angular)
   },
 
@@ -161,11 +137,6 @@ var SensorChart = React.createClass({
         return [xScale(d[0]), yScale(d[1])];
       });
     }
-
-    // var loadMoreData = {
-    //   extent: this.state.extent,
-    //   requestChange: this.update
-    // }
 
     return (
       <div ref={this.props.sensor + "SensorChart"}>
