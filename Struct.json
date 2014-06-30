@@ -1,0 +1,28 @@
+{
+	"RawView": {
+		"props": {
+			"data": {
+				"acc": [{
+					"endtime": "Number",
+					"starttime": "Number",
+					"tag": "String",
+					"ts": "Number",
+					"x": "Number",
+					"y": "Number",
+					"z": "Number"
+				}],
+				"gps": [{
+					"lonlat": {
+						"coordinates": ["Number", "Number"],
+						"ts": ["Number"]
+					}
+				}],
+				"har": [{
+					"tag": "String",
+					"ts": "String" // FIXME String -> Number
+				}],
+				"harSum": [["Number", "Number", "String"]] // FIXME Array -> Object, String -> Number
+			}
+		}
+	}
+}
