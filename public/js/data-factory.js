@@ -100,8 +100,8 @@
               d.endtime = +d.endtime;
             });
 
-            trip.sensorData.sensors[sensor] = trip.sensorData.sensors[sensor].merge(data); // TODO refactor helper to change 'this' and return something useful instead
-            deferred.resolve(trip.sensorData.sensors[sensor]);
+            trip.data[sensor] = trip.data[sensor].merge(data); // TODO refactor helper to change 'this' and return something useful instead
+            deferred.resolve(trip.data[sensor]);
           })
           .error(function (data, status, headers, config) {
             deferred.reject();

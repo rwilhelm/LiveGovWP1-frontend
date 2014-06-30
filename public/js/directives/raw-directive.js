@@ -14,14 +14,14 @@
         scope: { trip: '=', sensors: '@', onBrush: '&' },
         link: function($scope, $element, $attributes) {
           console.log('chartDirective:', $scope.sensors);
+
+          var sensors = $scope.sensors.split(',');
+
           function renderComponent() {
             React.renderComponent(
               RawView({
-
-                // TODO can i trigger $scope changes from within react
-                // components? should i?
-                // scope: $scope,
-
+                scope: $scope,
+                trip: $scope.trip,
                 data: $scope.trip.data,
                 onBrush: function(extent, oldExtent) {
                   console.log('chartDirective:onBrush', extent, oldExtent);
@@ -34,7 +34,7 @@
           var tripIsReady = function() {
             if (!$scope.trip) return false;
             if (!$scope.trip.data) return false;
-            // if (!$scope.trip.data.arrayLengthSum <= 600) return false;
+            if ($scope.trip.data.sumArrays(sensors) < (sensors.length * 200)) return false; // TODO shorten, refactor vars
             return true;
           };
 
