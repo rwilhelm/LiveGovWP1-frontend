@@ -1,13 +1,6 @@
 /*** @jsx React.DOM */
 
-var Brush = React.createClass({
-  loadMoreData: function(extent) {
-    // this.setState({ extent: extent });
-    console.log('Brush.jsx:loadMoreData' + this.props.sensor);
-    this.props.loadMoreData(extent);
-    // return this.props.loadMoreData(extent, this.props.extent);
-  },
-
+var Brush2 = React.createClass({
 	componentDidMount: function() {
     var xScale = d3.time.scale()
       .range([0, this.props.size.width]);
@@ -23,7 +16,6 @@ var Brush = React.createClass({
 
     brush.x(xScale)
       .on("brushend", this.brushended.bind(this, brush));
-      // .on("brushend", this.brushended.bind(this, brush));
 
     if (this.props.extent.length) {
       brush.extent(this.props.extent);
@@ -35,12 +27,13 @@ var Brush = React.createClass({
       .attr("class", "brush")
       .call(brush)
       .selectAll("rect")
-      .attr("height", this.props.size.height - 72); // TODO
+      .attr("height", this.props.size.height + 4); // FIXME
 	},
 
   brushended: function(brush) {
-    this.loadMoreData(brush.empty() ? [] : brush.extent().map(function(d) { return +d; }));
-    d3.selectAll('chart').select('.brush').call(brush.clear());
+    this.props.onBrush(brush.empty() ? [] : brush.extent().map(function(d) { return +d; }));
+    // d3.selectAll('chart').select('.brush').call(brush.clear());
+    d3.selectAll('.brush').call(brush.clear());
   },
 
 	render: function() {

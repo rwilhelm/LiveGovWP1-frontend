@@ -2,14 +2,17 @@
 
 var ChartInfo= React.createClass({
 	componentWillReceiveProps: function(nextProps) {
-		console.log('ChartInfo:componentWillReceiveProps' + this.props.sensor);
+		console.log('ChartInfo:componentWillReceiveProps');
 	},
 	render: function() {
 		var style = {
-			y: -30
+			// y: -30
 		};
+		var className = this.props.className;
 		return (
-			<div style={style}>EXTENT: {this.props.extent[0]}, {this.props.extent[1]}</div>
+			<div style={style} className={className}>
+				extent: {this.props.extent[0]}, {this.props.extent[1]}
+			</div>
 		);
 	}
 });
