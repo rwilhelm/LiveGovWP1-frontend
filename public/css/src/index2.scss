@@ -1,0 +1,116 @@
+
+// COLOR DEFINITIONS
+
+$color-x            : #2074c7;
+$color-y            : #24c02e;
+$color-z            : #b92819;
+$color-driving      : #377eb8;
+$color-running      : #e41a1c;
+$color-walking      : #ff7f00;
+$color-standing     : #4daf4a;
+$color-sitting      : #984ea3;
+$color-on-table     : #a65628;
+$color-unknown      : #777777;
+
+$axis-stroke-color  : black;
+$axis-stroke-width  : 1;
+$brush-transparency : 0.2;
+$domain-stroke-width: 1;
+$domain-stroke-color: black;
+$chart-stroke-width : 1;
+$data-table-height  : 500px;
+$svg-font           : 0.75em sans-serif;
+$axis-label-font    : 0.7em sans-serif;
+
+// GENERAL HTML SETUP
+
+body {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+	margin-bottom: 24px;
+	border-bottom: 2px solid $color-x;
+}
+
+#container {
+}
+
+raw {
+  width: 100%;
+  display: inline-block;
+}
+
+// GENERAL SVG SETUP
+
+svg {
+  height: 100%;
+  font: $svg-font;
+}
+
+path {
+	fill: none;
+}
+
+line {
+  stroke: $axis-stroke-color;
+  stroke-width: $axis-stroke-width;
+  shape-rendering: crispEdges;
+}
+
+// D3 SPECIFIC SETUP
+
+.extent {
+  fill-opacity: $brush-transparency;
+}
+
+.domain {
+  stroke: $domain-stroke-color;
+  stroke-width: $domain-stroke-width;
+  shape-rendering: crispEdges;
+  
+}
+
+.label {
+  font: $axis-label-font;
+}
+
+// COLOR APPLICATION
+
+.pathx { stroke: $color-x }
+.pathy { stroke: $color-y }
+.pathz { stroke: $color-z }
+
+// REACT COMPONENTS
+
+.sensorTable {
+  font-size: .75em;
+  display: inline-block; // ?
+  width: 33.1%; // ?
+  border: none !important;
+  max-height: $data-table-height;
+  overflow: scroll; // FIXME
+}
+
+#minimap {
+  position: fixed;
+  height: 50px;
+  display: block;
+  width: 100%;
+  clear: both;
+  left: 0;
+  right: 0;
+  padding: 0;
+  bottom: 0;
+}
+
+.tripInfo {
+  padding: 8px;
+}
+
+.sensorChart {
+  padding: 8px;
+  margin: 8px;
+  border: 1px solid #cdcdcd;
+}

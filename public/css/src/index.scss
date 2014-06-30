@@ -8,7 +8,7 @@
 
 // base colors
 $color1: #fece09;
-$color2: #0b66ff;
+$color2: #0b66fe;
 
 // table colors
 $table-row-hovered: lighten($color2, 45%);
@@ -360,11 +360,19 @@ pre {
   padding: 8px;
 }
 
-.brush {
-  // border-radius: 4px;
+/////////////////////////////////////////////////////////////////////////////
+/* BRUSH                                                                   */
+/////////////////////////////////////////////////////////////////////////////
+
+g.brush {
   background-color: rgba(0,0,0,0.2); //#f5f5f5;
   padding: 0;
   margin: 0;
+  // width: 100%;
+  // height: 100%;
+  // min-width: 100%;
+  // min-height: 100%;
+  display: inline-block;
 }
 
 raw {
@@ -378,26 +386,15 @@ chart {
   clip-path: url(#clip);
 }
 
-.row.brush {
-  position: absolute;
-  y: 100%;
-}
-
 #container {
   overflow: auto;
   margin-bottom: 50px;
   min-height: 100%;
 }
 
-#bottom {
-  // border: 2px solid #e53972;
+#minimap {
   position: fixed;
-  // bottom: -50px;
-  // margin-top: -50px;
   height: 50px;
-  // clear: both;
-  // padding-top: 20px;
-  // background-color: rgba(254, 206, 9, 0.5);
   background-color: #b3ccde;
   display: block;
   width: 100%;
@@ -406,6 +403,10 @@ chart {
   right: 0;
   padding: 0;
   bottom: 0;
+}
+
+rect.background {
+  fill: #56fae0;
 }
 
 .container-fluid {
@@ -430,11 +431,9 @@ minimap {
 }
 
 .extent {
-  // stroke: darken(#f5f5f5, 30%);
   stroke: none;
-  // fill: #fb6068;
   fill: #1d1f21;
-  fill-opacity: 0.5;
+  fill-opacity: 0.8;
   shape-rendering: crispEdges;
 }
 
