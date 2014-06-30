@@ -5,7 +5,7 @@ var compress = require('koa-compress');
 
 var env = process.env.NODE_ENV || 'development';
 
-app.use(require('koa-logger')());
+// app.use(require('koa-logger')());
 app.use(require('koa-body')());
 
 app.use(require('koa-static')(__dirname + '/../public'));
