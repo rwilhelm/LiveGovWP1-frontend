@@ -1,109 +1,80 @@
 doctype html
 
-html(lang="en", ng-app="inspectionFrontEnd")
+html(lang="en", data-ng-app="inspectionFrontEnd")
   head
     meta(charset="utf-8")
-    title= title
+    title 'fff'
 
     //- base(href="/")
 
     meta(name="google" content="notranslate")
     meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
 
-    //- to ensure css files are downloaded in parallel, include external css
-    //- before external javascript
+    //- to ensure css files are downloaded in parallel, include external css before external javascript
 
-    //- FIXME
-    link(href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css', rel='stylesheet')
     link(rel="stylesheet", href='./bower_components/mapbox.js/theme/style.css')
-    link(rel="stylesheet", href="./bower_components/bootstrap/dist/css/bootstrap.min.css")
-    link(rel="stylesheet", href="./css/index.css")
+    link(rel="stylesheet", href="./bower_components/pure/pure-min.css")
+    link(rel="stylesheet", href="./css/index2.css")
 
     //- keep it here
     script(src="./bower_components/angular/angular.js")
 
-  body(ng-controller="mainCtrl as main")
+  body(data-ng-controller="mainCtrl as main")
     header
-      div(ng-include src="'partial/navbar'")
+      div(data-ng-include data-src="'partial/navbar'")
 
-    #container
-      div(ng-include src="template")
+    #container(data-ng-include data-src="template")
 
-  script(src="./bower_components/angular-resource/angular-resource.js")
-  script(src="./bower_components/angular-route/angular-route.js")
-  //- script(src="./bower_components/ngReact/ngReact.js")
-  script(src="./bower_components/d3/d3.js")
-  script(src="./bower_components/d3-tip/index.js")
-  script(src="./bower_components/moment/min/moment.min.js")
-  script(src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js')
-  //- script(src='./bower_components/mapbox.js/mapbox.js')
-  script(src="./bower_components/react/react.js")
-  //- script(src="./bower_components/react/JSXTransformer.js")
-  //- script(src="./bower_components/jquery/dist/jquery.js")
-  //- script(src="./bower_components/underscore/underscore-min.js")
+    script(src="./bower_components/angular-resource/angular-resource.js")
+    script(src="./bower_components/angular-route/angular-route.js")
+    script(src="./bower_components/d3/d3.js")
+    script(src="./bower_components/react/react.js")
 
-  //- my custom js prototypes
-  script(src="js/helpers.js")
+    //- custom js prototypes, required
+    script(src="js/helpers.js")
 
-  //- d3 chart, minimap etc
-  //- TODO rewrite map as reusable component
-  //- TODO make minimap configurable
-  script(src="js/reusable/minimap-preview.js")
-  script(src="js/reusable/map.js")
-
-  //- angular
-  //- TODO require.js
-  //- find . -type f | grep -v module-cache\|DS_Store\|png\|\.md | sed 's/^.\//script(src=".\/js\//; s/$/")/; s/jsx/js/' | pbcopy
-
-  //-
-  //- app
-  //- components/reusables
-  //- directives
-  //- *
-  //-
-
-script(src="./js/app.js")
-script(src="./js/components/RawView.js")
-script(src="./js/components/Axis.js")
-script(src="./js/components/Brush.js")
-script(src="./js/components/Chart.js")
-script(src="./js/components/ChartInfo.js")
-script(src="./js/components/Circle.js")
-script(src="./js/components/Circles.js")
-script(src="./js/components/ClipPath.js")
-script(src="./js/components/DataSeries.js")
-script(src="./js/components/Label.js")
-script(src="./js/components/Map.js")
-script(src="./js/components/MiniMap.js")
-script(src="./js/components/MiniMapXs.js")
-script(src="./js/components/OLDCHART.js")
-script(src="./js/components/OLDCHART2.js")
-script(src="./js/components/OLDCHART3.js")
-script(src="./js/components/OLDMINIMAP.js")
-script(src="./js/components/Path.js")
-script(src="./js/components/Paths.js")
-script(src="./js/components/SensorChart.js")
-script(src="./js/components/TripTable.js")
-script(src="./js/config-service.js")
-script(src="./js/data-factory.js")
-script(src="./js/directives/chart-directive.js")
-script(src="./js/directives/chart-info-directive.js")
-script(src="./js/directives/raw-directive.js")
-script(src="./js/directives/map-directive.js")
-script(src="./js/directives/minimap-directive.js")
-script(src="./js/directives/minimap-xs-directive.js")
-script(src="./js/filters.js")
-script(src="./js/helpers.js")
-script(src="./js/http-interceptor.js")
-script(src="./js/main-controller.js")
-script(src="./js/msg-bus.js")
-script(src="./js/nav-controller.js")
-script(src="./js/reusable/chart.js")
-script(src="./js/reusable/map.js")
-script(src="./js/reusable/minimap-preview.js")
-script(src="./js/routes.js")
-script(src="./js/trip-controller.js")
-script(src="./js/trip-service.js")
+    //- find . -type f | grep -v module-cache\|DS_Store\|png\|\.md | sed 's/^.\//script(src=".\/js\//; s/$/")/; s/jsx/js/' | pbcopy
+    script(src="./js/app.js")
+    script(src="./js/components/RawView.js")
+    script(src="./js/components/Axis.js")
+    script(src="./js/components/Brush.js")
+    script(src="./js/components/Chart.js")
+    script(src="./js/components/TripInfo.js")
+    script(src="./js/components/ChartInfo.js")
+    script(src="./js/components/SensorTable.js")
+    script(src="./js/components/Table.js")
+    script(src="./js/components/Circle.js")
+    script(src="./js/components/Circles.js")
+    script(src="./js/components/ClipPath.js")
+    script(src="./js/components/Label.js")
+    script(src="./js/components/Map.js")
+    script(src="./js/components/MiniMap.js")
+    script(src="./js/components/MiniMapBrush.js")
+    script(src="./js/components/Path.js")
+    script(src="./js/components/Paths.js")
+    script(src="./js/components/SensorChart.js")
+    script(src="./js/components/TripTable.js")
+    script(src="./js/config-service.js")
+    script(src="./js/data-factory.js")
+    script(src="./js/directives/chart-directive.js")
+    script(src="./js/directives/chart-info-directive.js")
+    script(src="./js/directives/raw-directive.js")
+    script(src="./js/directives/map-directive.js")
+    script(src="./js/directives/minimap-directive.js")
+    script(src="./js/directives/minimap-xs-directive.js")
+    script(src="./js/filters.js")
+    script(src="./js/helpers.js")
+    script(src="./bower_components/moment/min/moment.min.js")
+    script(src="./js/http-interceptor.js")
+    script(src="./js/main-controller.js")
+    script(src="./js/msg-bus.js")
+    script(src="./js/nav-controller.js")
+    //- script(src="./js/reusable/chart.js")
+    //- script(src="./js/reusable/map.js")
+    //- script(src="./js/reusable/minimap-preview.js")
+    script(src="./js/routes.js")
+    script(src="./js/trip-controller.js")
+    script(src="./js/trip-service.js")
 
 //- ex:ft=jade
 //- eof
