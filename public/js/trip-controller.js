@@ -120,7 +120,7 @@ app.controller('tripCtrl',
 
     // apply the new extent to the $scope
     $scope.$apply(function() {
-      $scope.trip.sensorData.extent = extent;
+      $scope.trip.extent = extent;
     });
 
     // load more data only if we're zooming in
@@ -148,6 +148,6 @@ app.controller('tripCtrl',
   };
 
   this.matchExtent = function(d) {
-    return (d.ts >= $scope.trip.data.extent[0] && d.ts <= $scope.trip.data.extent[1]) ? true : false;
+    return !!(d.ts >= $scope.trip.data.extent[0] && d.ts <= $scope.trip.data.extent[1]);
   };
 }]);

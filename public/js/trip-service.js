@@ -162,7 +162,6 @@
 			count: function(trip) {
 				Config.sensors().forEach(function (sensor) {
 					// console.log(sensor, Data.count(trip, sensor));
-					debugger
 					Data.count(trip, sensor)
 					.then(function(data) {
 						console.log(data);

@@ -54,8 +54,8 @@
                 dataCount : 0,
                 data: {
                   har: [], // Human Activity Recognition Tags
-                  gps: [],
-                },
+                  gps: []
+                }
               };
 
               // create empty sensor arrays (acc, gra, lac) on the above data object
@@ -90,7 +90,7 @@
             url: 'api/trips/' + trip.id + '/sensors/' + sensor,
             params: {
               'w': (obj && obj.hasOwnProperty('windowSize') ? obj.windowSize : Config.windowSize()),
-              'e': (obj && obj.hasOwnProperty('extent')     ? obj.extent : undefined),
+              'e': (obj && obj.hasOwnProperty('extent')     ? obj.extent : undefined)
             }
           })
           .success(function (data, status, headers, config) {
