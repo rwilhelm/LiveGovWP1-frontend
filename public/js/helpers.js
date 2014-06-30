@@ -7,6 +7,17 @@
 
   /* GENERAL */
 
+  Object.prototype.calculateDomain = function(keys) {
+    return d3.extent(this.select(keys));
+  };
+
+  Object.prototype.select = function(keys) {
+    var that = this;
+    return keys.map(function(key) {
+      return that[key];
+    });
+  };
+
   // flatten an array
   Array.prototype.flatten = function() {
     return [].concat.apply([], this);
@@ -76,15 +87,11 @@
     return r;
   };
 
-  // warning: will fail if there are non-arrays in there. FIXME!
-  Object.prototype.arrayLengthSum = function() { // horrible name
-    Object.keys(this)
-    .map(function(key) {
-      return this[key].length;
-    })
-    .reduce(function(a,b) {
-      return a + b;
-    });
+  Object.prototype.sumArrays = function(keys) { // horrible name
+    var that = this; // FIXME
+    return keys
+    .map(function(key) { return that[key].length })
+    .reduce(function(a,b) { return a + b }, 0);
   };
 
   // Object.prototype.getById = function(id) {
@@ -140,11 +147,11 @@
 
   /* D3 */
 
-  Array.prototype.extent = function(a) {  // e.g. ['avgx, avgy, avgz']
-    return d3.extent(this.select(a)).map(function(d) {
-      return +d;
-    });
-  };
+  // Object.prototype.extent = function(a) {  // e.g. ['avgx, avgy, avgz']
+  //   return d3.extent(this.select(a)).map(function(d) {
+  //     return +d;
+  //   });
+  // };
 
 
   // http://stackoverflow.com/q/5971645/220472
@@ -198,4 +205,4 @@
 
 
 
-}())
+}());
