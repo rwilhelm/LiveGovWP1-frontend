@@ -3,7 +3,7 @@ BASEDIR = .
 IGNOREFILE = $(BASEDIR)/.gitignore
 REMOVEFILES = `cat $(IGNOREFILE)` *bz2
 
-NAME = NodeAngularFrontEnd
+NAME = lg-inspect
 TARBALL = $(NAME)-`date '+%Y%m%d'`.tar.bz2
 
 
