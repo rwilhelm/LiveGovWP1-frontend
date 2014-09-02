@@ -18,7 +18,14 @@ html(ng-app='app')
   body(ng-controller='appCtrl')
 
     header
-      menu(trip='trip', loc='routeParams.view', env='env')
+      menu(trip='trip', loc='routeParams.view', merge='merge', env='env')
+
+    //- #options
+    //-   form.options(name='options', ng-controller='appCtrl')
+    //-     pre merge
+    //-       input(type='checkbox', ng-model='merge')
+
+
 
     #content
       trips(ng-if='!routeParams.view', trips='trips', select-Trip='selectTrip(id)', delete-Trip='deleteTrip(id)', update-Trip='updateTrip(id, value)')

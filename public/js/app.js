@@ -111,6 +111,8 @@
         $rootScope.httpRequests--;
       });
 
+      $scope.merge = false;
+
       Data.trips()
       .then(function(data) {
         $scope.trips = data;
@@ -144,7 +146,13 @@
         Data.loadData($scope.trip, props, true)
         .then(function(data) {
           _.keys(data).forEach(function(sensor) {
-            $scope.trip.data[sensor] = $scope.trip.data[sensor].merge(data[sensor]);
+
+            if ($scope.merge) {
+              $scope.trip.data[sensor] = $scope.trip.data[sensor].merge(data[sensor]);
+            } else {
+              $scope.trip.data[sensor] = data[sensor];
+            }
+
 
             // NOTICE: in our directives we're watching $scope.trip, but here we're
             // updating $scope.trip.data. as a consequence, the directive's
@@ -354,7 +362,12 @@
         link: function($scope, $element) {
           $scope.$watch('trip.id', function(tripId) {
             React.renderComponent(Menu({
-              tripId: tripId || false
+              tripId: tripId || false,
+              merge: $scope.merge,
+              toggleMerge: function() {
+                $scope.merge = !!$scope.merge;
+              },
+
             }), $element[0]);
           });
         }
