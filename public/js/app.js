@@ -145,6 +145,13 @@
         .then(function(data) {
           _.keys(data).forEach(function(sensor) {
             $scope.trip.data[sensor] = $scope.trip.data[sensor].merge(data[sensor]);
+
+            // NOTICE: in our directives we're watching $scope.trip, but here we're
+            // updating $scope.trip.data. as a consequence, the directive's
+            // watch function will not recognize any change unless we do
+            // something in $scope.trip TODO
+
+            $scope.trip.updated = Date.now();
           });
         });
       };
@@ -172,6 +179,7 @@
               trip.stop = +trip.stop;
               trip.duration = trip.stop - trip.start;
               trip.user = trip.user.replace(/"/g, '');
+              trip.updated = Date.now();
             });
 
             deferred.resolve(data);
