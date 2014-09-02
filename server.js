@@ -116,7 +116,7 @@
     },
   };
 
-  app.use(require('koa-views')(__dirname + '/src/jade', { default: 'jade' }));
+  app.use(require('koa-views')(__dirname + '/src/jade', { default: 'jade', cache: false }));
   app.use(require('koa-logger')());
   app.use(require('koa-body')());
   app.use(require('koa-compress')());
