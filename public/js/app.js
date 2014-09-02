@@ -260,6 +260,13 @@
           });
         },
 
+        undeleteTrip: function(id) {
+          $http({ method: 'POST', url: 'trips/' + id + '/undelete' })
+          .success(function() {
+            console.info('UNDELETED TRIP', id);
+          });
+        },
+
         updateTrip: function (id, value) {
           $http({ method: 'POST', url: 'trips/' + id, data:{name:value} })
           .success(function() {
@@ -289,6 +296,9 @@
               },
               deleteTrip: function(id) {
                 $scope.deleteTrip({id:id});
+              },
+              undeleteTrip: function(id) {
+                $scope.undeleteTrip({id:id});
               },
               updateTrip: function(id, value) {
                 $scope.updateTrip({id:id, value:value});
