@@ -22,10 +22,12 @@ var Menu = React.createClass({
       return classes;
     }.bind(this);
 
+    // FIX BASE URL LINK ON "RECORDS" LINK FIXME
+
     return (
       <ul className='pure-menu pure-menu-open pure-menu-horizontal'>
         <li>
-          <a href='/'>Records</a>
+          <a href='#/'>Records</a>
         </li>
         <li className={className('raw')}>
           <a href={href('raw')}>Raw Data</a>
