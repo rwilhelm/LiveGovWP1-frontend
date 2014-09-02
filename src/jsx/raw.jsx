@@ -12,6 +12,10 @@ var Raw = React.createClass({
     };
   },
 
+  componentWillReceiveProps: function(nextProps) {
+    console.log('componentWillReceiveProps: nextprops: ', nextProps)
+  },
+
   render: function() {
 		return (
       <div id='raw'>

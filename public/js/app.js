@@ -34,7 +34,7 @@
       windowSize: 200
     };
 
-    // angular module
+    // --angular module
 		angular.module('app', ['ngResource', 'ngRoute'])
 
     // provide location.path() in template
@@ -45,7 +45,7 @@
     // http interceptor (so we can check on ongoing xhr calls)
     .config(function ($httpProvider, $provide, $routeProvider) {
 
-      // (fake) routes
+      // (fake) routes TODO
       $routeProvider
       .when('/:view/:id', {})
       .otherwise({redirectTo: '/'});
@@ -76,11 +76,16 @@
       $httpProvider.interceptors.push('httpInterceptor');
     })
 
-    // ANGULAR CONTROLLER
+    // NOTICE: there's only one controller
+
+    // --controller start
 		.controller('appCtrl', ['$rootScope', '$scope', '$location', '$route', '$routeParams', 'Data',
 			function($rootScope, $scope, $location, $route, $routeParams, Data) {
 
       console.log('ANGULAR ENV: ', $scope.env);
+
+
+
 
       // handle intercepted http requests
       if (!$rootScope.httpRequests) { $rootScope.httpRequests = 0; }
@@ -111,6 +116,11 @@
         $rootScope.httpRequests--;
       });
 
+
+
+
+      // actual app initialization
+
       $scope.merge = false;
 
       Data.trips()
@@ -119,6 +129,7 @@
         if ($routeParams.id) { $scope.selectTrip(+$routeParams.id); }
       });
 
+      // click on a trip
       $scope.selectTrip = function(id) {
         $scope.trip = $scope.trips.filter(function(trip) {
           return trip.id === id;
@@ -142,7 +153,9 @@
         });
       };
 
+      // change brush extent
       $scope.loadMoreData = function(id, props) {
+        console.log()
         Data.loadData($scope.trip, props, true)
         .then(function(data) {
           _.keys(data).forEach(function(sensor) {
@@ -153,6 +166,7 @@
               $scope.trip.data[sensor] = data[sensor];
             }
 
+            console.log('angular loadMoreData ___ $scope.trip.data updated! ___ ');
 
             // NOTICE: in our directives we're watching $scope.trip, but here we're
             // updating $scope.trip.data. as a consequence, the directive's
@@ -164,14 +178,17 @@
         });
       };
 
+      // click a delete button in list view
       $scope.deleteTrip = function(id) {
         $scope.trips = $scope.trips.filter(function(trip) { return trip.id !== id; });
         Data.deleteTrip(id);
       };
 
+      // type something to the name column in list view
       $scope.updateTrip = function(id, value) {
         Data.updateTrip(id, value);
       };
+      // --controller end
 		}])
 
     // DATA FACTORY (MAKES API CALLS)
@@ -324,7 +341,13 @@
         restrict: 'E',
         link: function($scope, $element) {
           $scope.$watchCollection('trip', function(trip) {
-            if (!trip || !trip.data) { return; }
+            if (!trip || !trip.data) {
+              console.warn('angular raw directive ___ $scope.trip has changed! ___ RETURN');
+              return;
+            } else {
+              console.info('angular raw directive ___ $scope.trip has changed! ___ OK');
+            }
+
 
             React.renderComponent(Raw({
               trip:trip,

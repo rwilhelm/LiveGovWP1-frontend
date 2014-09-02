@@ -28,6 +28,8 @@ var Trips = React.createClass({
 
   render: function() {
 
+    console.log('angular $scope.trip.data: trip data has changed!');
+
     var trips = this.props.trips;
 
     // table rows
