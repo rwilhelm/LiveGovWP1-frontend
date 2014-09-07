@@ -3,6 +3,7 @@
   "version": "0.0.9",
   "main": "gulpfile.js",
   "dependencies": {
+    "jade": "^1.6.0",
     "koa": "^0.10.0",
     "koa-body": "^0.2.0",
     "koa-compress": "^1.0.7",

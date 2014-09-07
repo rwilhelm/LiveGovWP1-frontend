@@ -26,7 +26,6 @@ html(ng-app='app')
     //-       input(type='checkbox', ng-model='merge')
 
 
-
     #content
       trips(ng-if='!routeParams.view', trips='trips', select-Trip='selectTrip(id)', delete-Trip='deleteTrip(id)', update-Trip='updateTrip(id, value)')
       raw(ng-if='routeParams.view == "raw"', trip='trip', load-More-Data='loadMoreData(id, props)')
