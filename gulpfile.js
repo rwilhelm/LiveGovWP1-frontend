@@ -61,6 +61,16 @@
     .on('change', []);
   });
 
+  gulp.task('server-local', function() {
+    nodemon({
+      script: 'server.js',
+      watch: 'server.js',
+      nodeArgs: ['--harmony'],
+      env: { NODE_ENV: 'local' }
+    })
+    .on('change', []);
+  });
+
   // gulp.task('tunnel', function() {});
 
   gulp.task('watch', function() {
@@ -70,5 +80,6 @@
 
   gulp.task('development', ['react', 'sass', 'server-development', 'watch']);
   gulp.task('production',  ['react', 'sass', 'server-production', 'watch']);
+  gulp.task('local',       ['react', 'sass', 'server-local', 'watch']);
   gulp.task('default',     ['react', 'sass', 'server', 'watch']);
 }());

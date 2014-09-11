@@ -15,6 +15,13 @@ module.exports = function(){
       db: 'pg://postgres:liveandgov@localhost/liveandgov_dev'
     };
 
+    // LOCAL PSQL WITH NEW DB ON liveandgov_test
+    case 'local':
+    return {
+      port: 4001,
+      db: 'pg://postgres:liveandgov@localhost/liveandgov_dev'
+    };
+
     // DEV MODE W/ SSH TUNNEL
     default:
     console.log('\nRunning in SSH tunnel mode. Other options to NODE_ENV are \'production\' or \'development\'');
