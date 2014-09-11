@@ -1,11 +1,6 @@
 (function() {
 	'use strict';
 
-  function extentToSQL(extent) {
-    var e = extent.split(',');
-    return ' AND ts >= ' + e[0] + ' AND ts <= ' + e[1];
-  }
-
   var sensors = [
     'sensor_accelerometer',
     'sensor_gravity',
@@ -68,7 +63,6 @@
         q = 'SELECT * FROM sensor_tags WHERE trip_id = ' + id + 'ORDER BY ts ASC';
       } else if (windowSize) {
         q = 'SELECT avg(x) x, avg(y) y, avg(z) z, avg(ts) ts FROM (SELECT x, y, z, ts, NTILE(' + windowSize + ') OVER (ORDER BY ts) AS w FROM ' + sensor + ' WHERE trip_id = ' + id + extent + ') A GROUP BY w ORDER BY w';
-        // q = 'SELECT avg(x) AS data1, avg(y) AS data2, avg(z) AS data3, avg(ts) AS x FROM (SELECT x, y, z, ts, NTILE(' + windowSize + ') OVER (ORDER BY ts) AS w FROM ' + sensor + ' WHERE trip_id = ' + id + extent + ') A GROUP BY w ORDER BY w';
       } else {
         q = 'SELECT * from ' + sensor + ' WHERE trip_id = ' + id + extent + 'ORDER BY ts ASC';
       }

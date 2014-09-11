@@ -32,60 +32,14 @@
 
   var api = new Router();
 
-  // ------------------------------------------------------------------------------------------
-
-  // api.get('/ingredients', function *() {
-  //   this.body = yield ingredients.find({});
-  // });
-
-  // api.post('/ingredients/new', function *() {
-  //   yield ingredients.insert(this.request.body);
-  //   this.status = 204;
-  // });
-
-  // api.get('/recipes', function *() {
-  //   this.body = yield recipes.find({});
-  // });
-
-  // api.post('/recipes/new', function *() {
-  //   this.body = yield ingredients.insert(this.request.body);
-  //   this.status = 204;
-  // });
-
-  // ------------------------------------------------------------------------------------------
-
   api.get('/schema', function *() {
   	this.body = schema;
   });
 
-  // api.get('/tc', function *() {
-  // 	var tables = function() {
-  // 		return new Promise(function(resolve, reject) {
-	 //  		resolve(this.pg.db.client.query_(queries.allTables()));
-	 //  	}.bind(this));
-  // 	}.bind(this);
-
-  // 	// var columns = function(tableName) {
-  // 	// 	return new Promise(function(resolve, reject) {
-	 //  // 		resolve(this.pg.db.client.query_(queries.allTables()));
-  // 	// 	});
-  // 	// };
-
-  // 	var result = [];
-
-  // 	tables().then(function(data) {
-  // 		console.log(data());
-  // 	});
-
-  // 	// tables.then(function(data) {
-  // 	// 	data.forEach(function(d) {
-  // 	// 		result.push(columns(d));
-  // 	// 	});
-  // 	// });
-
-  // 	this.body = result;
-  // });
-
+  function extentToSQL(extent) {
+    var e = extent.split(',');
+    return ' AND ts >= ' + e[0] + ' AND ts <= ' + e[1];
+  }
 
   api.get('/tables', function *() {
   	var result = yield this.pg.db.client.query_(queries.allTables());
@@ -105,10 +59,8 @@
   // count sensor data for a trip
   //   curl -s localhost:3476/trips/850/count
   api.get('/count/:tripId', function *() {
-  	console.log(this.query.q);
     var result = yield this.pg.db.client.query_(queries.count(this.params.tripId, this.query.q));
     var z = {};
-    console.log(result.rows);
     _.forEach(result.rows, function(d) {
 	    z[_(d).keys().head()] = { count: _(d).values().head() };
 	  });
@@ -123,7 +75,6 @@
     var extent = this.query.e ? extentToSQL(this.query.e) : '';
     var result = yield this.pg.db.client.query_(
       queries.sensor(this.params.tripId, this.params.sensor, this.query.w, extent));
-    console.log(result.rows);
     this.body = result.rows;
   });
 

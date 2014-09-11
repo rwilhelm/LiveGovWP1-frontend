@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="lib/pure/pure-min.css"/>
 	<link href="lib/c3/c3.css" rel="stylesheet" type="text/css">
-  <!-- <link rel="stylesheet" href="./css/index.css"/> -->
+  <link rel="stylesheet" href="./css/index.css"/>
 
 	<script src="lib/angular/angular.js" charset="utf-8"></script>
 	<script src="lib/angular-resource/angular-resource.js" charset="utf-8"></script>
@@ -26,17 +26,14 @@
     <menu trip="trip" loc="routeParams.view" merge="merge" env="env"></menu>
   </header>
 
+  <a ui-sref="ingredients">ingredients</a>
+  <a ui-sref="recipes">recipes</a>
 
-<!--   <div id="content">
-    <trips ng-if="!routeParams.view" trips="trips" select-Trip="selectTrip(id)" delete-Trip="deleteTrip(id)" update-Trip="updateTrip(id, value)"></trips>
-    <raw ng-if="routeParams.view == &quot;raw&quot;" trip="trip" load-More-Data="loadMoreData(id, props)"></raw>
-    <har ng-if="routeParams.view == &quot;har&quot;" trip="trip" load-More-Data="loadMoreData(id, props)"></har>
-  </div>
- -->
+  <div ui-view></div>
 
-	<div ng-repeat='(tripName, tripData) in trip.data'>
-		<div id='{{tripName}}'></div>
-	</div>
+	<charts data='trip.data' load-More-Data="loadMoreData(id, props)" trip-Data-Updated='trip.data.updated'>
+
+	<trips>
 
 	</script>
     <script src="lib/moment/min/moment.min.js"></script>

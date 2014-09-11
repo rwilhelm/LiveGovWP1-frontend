@@ -93,9 +93,6 @@
 
       // console.log('ANGULAR ENV: ', $scope.env);
 
-
-
-
       // handle intercepted http requests
       if (!$rootScope.httpRequests) { $rootScope.httpRequests = 0; }
       if (!$rootScope.httpRequestErrors) { $rootScope.httpRequestErrors = false; }
@@ -146,7 +143,7 @@
 
         var promises = [];
         var deferred = $q.defer();
-
+        $scope.tripDataReady = false;
         $scope.merge = false;
 
         // all trips
@@ -173,7 +170,7 @@
           $scope.selectTrip(+$routeParams.id);
         }
 
-        console.log('___READY___');
+        console.log('___INIT DONE___');
         $scope.ready = true;
       });
 
@@ -204,55 +201,17 @@
           Data.loadData($scope.trip)
           .then(function(data) {
             $scope.trip.data = data;
-            console.log('trip ready', $scope.trip);
-            $scope.renderCharts();
+            $scope.trip.data.updated = Date.now();
+            console.log('___TRIP READY___', $scope.trip);
             $location.path('raw/' + id);
           });
         });
 
       };
 
-      $scope.renderCharts = function() {
-        _($scope.trip.data).select('isMotionSensor').map(function(d, i, a) {
-          var chart = {
-            bindto: '#' + d.name,
-            data: {
-              x: 'ts',
-              xFormat: '%s',
-              columns: d.data
-            },
-            subchart: {
-              show: true
-            },
-            zoom: {
-              enabled: true
-            },
-
-            axis: {
-              y: {
-                label: {
-                  text: 'value',
-                  position: 'outer-middle'
-                }
-              },
-              x: {
-                label: {
-                  text: 'time',
-                  position: 'outer-middle'
-                },
-                type: 'timeseries',
-                tick: {
-                  format: '%Y-%m-%d %M:%S'
-                }
-              }
-            }
-          };
-          c3.generate(chart);
-        }).value();
-      };
-
       // change brush extent
       $scope.loadMoreData = function(id, props) {
+        console.log('___LOAD_MORE_DATA___');
         Data.loadData($scope.trip, props, true)
         .then(function(data) {
           _.keys(data).forEach(function(sensor) {
@@ -270,7 +229,7 @@
             // directive's watch function will not recognize any change unless
             // we do something in $scope.trip TODO
 
-            $scope.trip.updated = Date.now();
+            $scope.trip.data.updated = Date.now();
           });
         });
       };
@@ -348,18 +307,22 @@
         // get all sensor, gps and har data for a trip
         loadData: function(trip, params, more) {
           var deferred = $q.defer();
+          console.log('___LOAD_MORE_DATA___***');
+
+          // save name
+          _(trip.data).forEach(function(sensor, sensorName) { sensor.name = sensorName; });
 
           // filter out sensors without data
           var sensors = _.pick(trip.data, function(d) { return d.count > 0; });
 
           // only load more data for motion sensors (BEWARE)
           if (more) {
-            sensors = _.pick(sensors, 'isMotionSensor');
+            sensors = _.omit(sensors, function(d) { return !d.isMotionSensor; });
           }
 
           // create an array of promises
-          var queries = _(sensors).keys().map(function(sensor) {
-            return $http.get(config.api.sensors(trip.id, sensor), {
+          var queries = _(sensors).map(function(sensor) {
+            return $http.get(config.api.sensors(trip.id, sensor.name), {
               params: {
                 'w': (params && params.windowSize || config.windowSize),
                 'e': (params && params.extent.join(","))
@@ -372,27 +335,10 @@
 
             _.forEach(arr, function(a) {
               var sensor = sensors[_.last(a.config.url.split('/'))];
-
-              sensor.name = _.last(a.config.url.split('/'));
-
-              if (sensor.isMotionSensor) {
-
-                // prepare column oriented data
-                // http://c3js.org/samples/data_columned.html
-                sensor.data = _(['x', 'y', 'z', 'ts'])
-                .zip(_(a.data).map(function(row) {
-                  return _.values(row).map(parseFloat);
-                }).zip().value())
-                .value().map(function(d) {
-                  d[1].unshift(d[0]);
-                  return d[1];
-                });
-              } else {
-                sensor.data = _(a.data).each(function(row) {
-                  // row.tag = row.tag.replace(/"/g, '').replace(/ /g, '_'); // FIXME
-                  row.ts = +row.ts;
-                }).value();
-              }
+              console.log(sensor);
+              sensor.data = _.forEach(a.data, function(row) {
+                row.ts = +row.ts;
+              });
             });
 
             deferred.resolve(sensors);
@@ -462,6 +408,36 @@
             $scope.updateTrip({id:id, value:value});
           },
         }), $element[0]);
+
+      });
+    }
+  };
+}])
+
+.directive('charts', [function(){
+  return {
+    scope: { data: '=', loadMoreData: '&', tripDataUpdated: '=' },
+    restrict: 'E',
+    link: function($scope, $element) {
+      $scope.$watch('tripDataUpdated', function(data) {
+
+        var tripDataReady = (function() {
+          return !_($scope.data).select(function(d) { return d.data && d.data.length; }).map('data').flatten().size();
+        })();
+
+        if (tripDataReady) {
+          console.warn('angular chart directive ___ $scope.data has changed! ___ RETURN');
+        } else {
+          console.info('angular chart directive ___ $scope.data has changed! ___ RENDER COMPONENT');
+          React.renderComponent(Charts({
+            data: _.select($scope.data, 'isMotionSensor'),
+            extent: [],
+            width: $element[0].parentNode.offsetWidth,
+            loadMoreData: function(props) {
+              $scope.loadMoreData({props:props});
+            },
+          }), $element[0]);
+        }
 
       });
     }
