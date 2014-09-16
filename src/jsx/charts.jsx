@@ -11,50 +11,49 @@ var Charts = React.createClass({
   },
 
   onBrush: function(extent) {
-    this.setState({extent: extent}); // propagate extent to child components
-    this.props.loadMoreData({extent: extent}); // tell angular to load more data
+    this.setState({extent: extent}); // propagate extent to child components (downwards)
+    this.props.setState({extent: extent}) // propagate extent to angular (upwards)
+    // this.props.loadMoreData({extent: extent}); // tell angular to load more data
   },
 
   getInitialState: function() {
     return {
-      xDomain: this.calculateDomain(this.props.data, ['ts']),
-      yDomain: this.calculateDomain(this.props.data, ['x', 'y', 'z']),
+      xDomain: this.calculateDomain(this.props.sensors, ['ts']),
+      yDomain: this.calculateDomain(this.props.sensors, ['x', 'y', 'z']),
     };
   },
 
   componentWillReceiveProps: function(nextProps) {
     this.setState({
-      xDomain: this.calculateDomain(nextProps.data, ['ts']),
-      yDomain: this.calculateDomain(nextProps.data, ['x', 'y', 'z']),
+      xDomain: this.calculateDomain(nextProps.sensors, ['ts']),
+      yDomain: this.calculateDomain(nextProps.sensors, ['x', 'y', 'z']),
     });
   },
 
   render: function() {
-    var data = this.props.data;
-    var charts =
-      data.map(function(sensor) {
-        return (
-          <div key={sensor.name} className='pure-g'>
-            <div className='pure-u-24-24'>
-              <ChartHeader
-                sensorName={sensor.name.replace(/sensor/, '').replace(/_/g, ' ')}
-                loadedData={sensor.data.length}
-              />
-              <ChartInfo
-                sensorName={sensor.name}
-                loadedData={sensor.data.length}
-              />
-              <Chart
-                data={sensor.data}
-                extent={this.props.extent}
-                xDomain={this.state.xDomain}
-                yDomain={this.state.yDomain}
-                onBrush={this.onBrush}
-              />
-            </div>
+    var charts = _.map(this.props.sensors, function(sensor, sensorName) {
+      return (
+        <div key={sensorName} className='pure-g'>
+          <div className='pure-u-24-24'>
+            <ChartHeader
+              sensorName={sensorName.replace(/sensor/, '').replace(/_/g, ' ')}
+              loadedData={sensor.data.length}
+            />
+            <ChartInfo
+              sensorName={sensorName}
+              loadedData={sensor.data.length}
+            />
+            <Chart
+              data={sensor.data}
+              extent={this.props.extent}
+              xDomain={this.state.xDomain}
+              yDomain={this.state.yDomain}
+              onBrush={this.onBrush}
+            />
           </div>
-        );
-      }.bind(this))
+        </div>
+      );
+    }.bind(this))
 
     return (
       <div>{charts}</div>

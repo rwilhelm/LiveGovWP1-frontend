@@ -21,6 +21,8 @@
 	var pg = require('koa-pg');
 
 	var queries = require('./config/database/queries');
+
+  var views = require('./config/views');
 	var schema = require('./config/items');
 
   app.use(logger);
@@ -42,8 +44,8 @@
   }
 
   api.get('/tables', function *() {
-  	var result = yield this.pg.db.client.query_(queries.allTables());
-  	this.body = result.rows;
+    var result = yield this.pg.db.client.query_(queries.allTables());
+    this.body = result.rows;
   });
 
   api.get('/columns/:tableName', function *() {

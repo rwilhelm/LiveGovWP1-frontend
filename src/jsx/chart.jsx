@@ -94,7 +94,7 @@ var Brush = React.createClass({
   },
 
   onBrushend: function(brush) {
-    console.log('brush extent', brush.extent().map(function(d) { return +d; }));
+    // console.log('brush extent', brush.extent().map(function(d) { return +d; }));
     this.props.onBrush(brush.empty() ? [] : brush.extent().map(function(d) { return +d; }));
     d3.selectAll('.brush').call(brush.clear());
   },
@@ -246,9 +246,9 @@ var Chart = React.createClass({
             <g className='y axis' />
           </g>
           <g className='chart' width={this.state.width} height={this.state.height} transform={translate(this.props.margin.left, this.props.margin.top)}>
-            <Brush width={this.state.width} height={this.state.height} extent={this.props.extent} xDomain={this.props.xDomain} yDomain={this.props.yDomain} onBrush={this.props.onBrush} />
             <Paths data={pathData(['x', 'y', 'z'])} />
             <Circles data={circleData(['x', 'y', 'z'])} />
+            <Brush width={this.state.width} height={this.state.height} extent={this.props.extent} xDomain={this.props.xDomain} yDomain={this.props.yDomain} onBrush={this.props.onBrush} />
           </g>
         </svg>
       </div>

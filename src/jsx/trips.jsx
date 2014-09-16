@@ -36,11 +36,9 @@ var Trips = React.createClass({
     // var trips = this.props.trips.filter(function(trip) { return (trip.start < trip.stop); });
     var trips = this.props.trips.map(function(trip) {
 
-      var warnings = [];
-
-      if (trip.start > trip.stop) warnings.push('wrong timestamp');
-      if (trip.start === trip.stop) warnings.push('zero duration');
-      if (trip.user.match(/"/)) warnings.push('bad quoting');
+      // if (trip.start > trip.stop) warnings.push('wrong timestamp');
+      // if (trip.start === trip.stop) warnings.push('zero duration');
+      // if (trip.user.match(/"/)) warnings.push('bad quoting');
 
       // var info = Object.keys(trip.info).map(function(key, i) {
       //   return <div key={i} className={key}>{trip.info[key]}</div>;
