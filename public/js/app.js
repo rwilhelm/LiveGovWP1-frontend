@@ -171,8 +171,8 @@
 
         console.info('>>> INIT DONE');
 
-        if ($state.params.tripId) {
-          $scope.selectTrip($state.params.tripId);
+        if ($state.params.tripId) { // <-- ui-router $state
+          $scope.selectTrip($state.params.tripId); // auto-select trip
           console.info('>>> TRIP SELECTED:', $state.params.tripId);
         }
       });
@@ -180,13 +180,11 @@
       // click on a trip & load initial data
       $scope.selectTrip = function(id) {
         $scope.trip.props = _($scope.trips).select({id: +id}).head();
-
         Data.loadData($scope.trip)
         .then(function() {
           console.info('>>> TRIP READY', $scope.trip);
           $state.go('raw', {tripId: id});
         });
-
       };
 
       $scope.setState = function(state) {
@@ -195,9 +193,16 @@
         $scope.loadMoreData($scope.trip);
       };
 
+      // $scope.loadData = function(trip) {
+      //   Data.loadData($scope.trip)
+      //   .then(function() {
+      //     console.info('>>> TRIP DATA LOADED', $scope.trip);
+      //   });
+      // };
+
       // change brush extent
-      $scope.loadMoreData = function(trip, props) {
-        Data.loadData($scope.trip, props)
+      $scope.loadMoreData = function(trip) {
+        Data.loadData($scope.trip)
         .then(function() {
           console.info('>>> TRIP DATA UPDATED', $scope.trip);
         });
@@ -220,32 +225,34 @@
 
     }])
 
-    // DATA FACTORY (MAKES API CALLS)
-    .factory('Data', ['$http', '$q', function($http, $q) {
+    // DATA FACTORY^W^W^W^W^W^W^WSERVICE
+    .service('Data', ['$http', '$q', function($http, $q) {
+
+      var tables = {};
+
       return {
 
         tables: function() {
           var deferred = $q.defer();
 
-          var t = {}; // returning table object
+          if (tables.length) {
+            deferred.resolve(tables);
+          } else {
+            $http.get(config.api.tables)
+            .success(function(data) {
 
-          $http.get(config.api.tables)
-          .success(function(tables) {
-
-            var promises = [];
-
-            tables.forEach(function(table) {
-              promises.push($http.get(config.api.columns(table.relname))
+              var promises = data.map(function(table) {
+                return $http.get(config.api.columns(table.relname))
                 .success(function(columns) {
-                  t[table.relname] = _.map(columns, 'attname');
-                }));
-            });
+                  tables[table.relname] = _.map(columns, 'attname');
+                });
+              });
 
-            $q.all(promises).then(function(data) {
-              deferred.resolve(t);
+              $q.all(promises).then(function(data) {
+                deferred.resolve(tables);
+              });
             });
-
-          });
+          }
 
           return deferred.promise;
         },
@@ -271,30 +278,23 @@
           return deferred.promise;
         },
 
-        count: function(id) {
-          return $http.get(config.api.count(id));
-        },
-
         // get all sensor, gps and har data for a trip
-        loadData: function(trip, params, more) {
+        loadData: function(trip) {
 
           var init = function() {
             var deferred = $q.defer();
-            var tables;
 
             if (trip.state.updated) {
               deferred.resolve(_.pick(trip.sensors, function(d) { return d.isMotionSensor; }));
             } else {
-              $q.all([this.tables(), this.count(trip.props.id)])
-              .then(function(res) {
-                tables = res[0];
-                trip.sensors = _.omit(res[1].data, function(sensor) { return sensor.count <= 0; });
 
+              $http.get(config.api.count(trip.props.id)).then(function(res) {
+                trip.sensors = _.omit(res.data, function(sensor) { return sensor.count <= 0; });
 
                 // mark motion sensors
                 _(trip.sensors).forEach(function(sensor, sensorName) {
                   sensor.isMotionSensor = _(['x', 'y', 'z']).all(function(xyz) {
-                    return _(tables[sensorName]).values().contains(xyz);
+                    return _(tables[sensorName]).values().contains(xyz); // XXX
                   });
                 });
 
@@ -310,8 +310,8 @@
             var queries = _(sensors).map(function(sensor, sensorName) {
               return $http.get(config.api.sensors(trip.props.id, sensorName), {
                 params: {
-                  'w': (params && params.windowSize || config.windowSize),
-                  'e': (params && params.extent.join(","))
+                  'w': (trip.state.windowSize || config.windowSize),
+                  'e': (trip.state.extent && trip.state.extent.join(","))
                 }
               });
             });
@@ -320,8 +320,6 @@
             .then(function(sensors) {
               _.forEach(sensors, function(sensor) {
                 var sensorName = _.last(sensor.config.url.split('/'));
-
-                // merge/nomerge
 
                 trip.sensors[sensorName].data = _.forEach(sensor.data, function(d) {
                   d.ts = +d.ts;
