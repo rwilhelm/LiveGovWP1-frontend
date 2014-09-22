@@ -1,20 +1,20 @@
 (function() {
 	'use strict';
 
-  var sensors = [
-    'sensor_accelerometer',
-    'sensor_gravity',
-    'sensor_gyroscope',
-    'sensor_linear_acceleration',
-    'sensor_magnetic_field',
-    'sensor_rotation'
-  ];
+  var items = require('../items');
+  var _ = require('lodash');
 
-  var moreSensors = [
-    'sensor_gps',
-    'sensor_har',
-    'sensor_tags',
-  ];
+  var motionSensors = _.pick(items, function(item) {
+    return _(['x','y','z']).every(function(xyz) {
+      return _(item).keys().contains(xyz);
+    });
+  });
+
+  var nonMotionSensors = _.omit(items, function(item) {
+    return _(['x','y','z']).every(function(xyz) {
+      return _(item).keys().contains(xyz);
+    });
+  });
 
 	module.exports = {
 
@@ -24,10 +24,6 @@
 
 		tableColumns: function(tableName) {
 			return "SELECT attname FROM pg_attribute WHERE attrelid = 'public." + tableName + "'::regclass AND attnum > 0 AND NOT attisdropped ORDER BY attnum";
-		},
-
-		motionSensorTables: function() {
-
 		},
 
     trips: function() {
