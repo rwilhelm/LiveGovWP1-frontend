@@ -126,7 +126,10 @@
       Data.trips()
       .then(function(data) {
         $scope.trips = data;
-        if ($routeParams.id) { $scope.selectTrip(+$routeParams.id); }
+        if ($routeParams.id) {
+          $state.go(to, result.params, {notify: false});
+          $scope.selectTrip(+$routeParams.id);
+        }
       });
 
       // click on a trip
@@ -147,8 +150,9 @@
           Data.loadData($scope.trip)
           .then(function(data) {
             $scope.trip.data = data;
+            $state.go('raw', {tripId: id});
             console.log('ready', $scope.trip);
-            $location.path('raw/' + id);
+            // $location.path('raw/' + id);
           });
         });
       };
