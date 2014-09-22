@@ -4,47 +4,19 @@
 (function() {
   'use strict';
 
-  window.SCOPE = function(selector){
-    return angular.element(selector).scope();
+  var config = {
+    api: {
+      trips: 'api/trips',
+      tables: 'api/tables',
+      columns: function(table) { return 'api/columns/' + table; },
+      sensors: function(id, sensor) { return 'api/trips/' + id + '/' + sensor; },
+      count: function(id, table) { return 'api/count/' + id + '/' + table; },
+    },
+    windowSize: 200
   };
 
-  // merge two sensor data arrays, sorted w/o duplicates
-  Array.prototype.merge = function(array) {
-    if (!this.length) return array;
-    if (!array.length) return this;
-
-    // sort by timestamp first, then remove the ones where a[i+1].endtime is
-    // bigger than a[i].endtime
-
-    return this.concat(array)
-    .sort(function(a,b) {
-      return d3.ascending(a.ts, b.ts);
-    })
-      .filter(function(d,i,a) { // true returns d
-        return (a[i+1] ? (a[i].stop <= a[i+1].stop) : true);
-      })
-      .filter(function(d,i,a) { // FIXME there are still remaining entries after the first filter run
-        return (a[i+1] ? (a[i].stop <= a[i+1].stop) : true);
-      });
-    };
-
-    var config = {
-      api: {
-        // schema: 'api/schema',
-        tables: 'api/tables',
-        columns: function(tableName) { return 'api/columns/' + tableName; },
-        trips: 'api/trips',
-        check: function(id) { return 'api/trips/' + id + '/check'; },
-        count: function(id) { return 'api/count/' + id; },
-        sensors: function(id, sensor) { return 'api/trips/' + id + '/' + sensor; }
-      },
-      windowSize: 200
-    };
-
-  // --angular module
   angular.module('app', ['ngResource', 'ui.router'])
 
-  // http interceptor (so we can check on ongoing xhr calls)
   .config(function ($provide, $httpProvider, $stateProvider, $urlRouterProvider) {
 
     $urlRouterProvider.otherwise('/');
@@ -67,14 +39,7 @@
       templateUrl: 'sld.html'
     });
 
-    // .state('charts',e {
-    //   template: '<charts data="trip.sensors" load-More-Data="loadMoreData(id, props)" trip-Data-Updated="trip.sensors.updated">'
-    // })
-    // .state('trips', {
-    //   url: '/',
-    //   template: '<trips trips="tables.trip.sensors" select-Trip="selectTrip(id)" delete-Trip="deleteTrip(id)">'
-    // });
-
+    // http interceptor (so we can check on ongoing xhr calls)
     $provide.factory('httpInterceptor', function ($q, $rootScope) {
       return {
         'request': function (config) {
@@ -133,9 +98,6 @@
       // console.error('http response error');
       $rootScope.httpRequests--;
     });
-
-
-
 
     // actual app initialization
 
@@ -253,6 +215,21 @@
         return deferred.promise;
       },
 
+      count: function(tripId) {
+        var deferred = $q.defer();
+        debugger
+        var promises = _.keys(tables).map(function(table) {
+          return $http.get(config.api.count(tripId, table));
+        });
+
+        $q.all(promises).then(function(data) {
+          debugger
+          deferred.resolve(data);
+        });
+
+        return deferred.promise;
+      },
+
       // get all trips
       trips: function() {
         var deferred = $q.defer();
@@ -283,8 +260,8 @@
           if (trip.state.updated) {
             deferred.resolve(_.pick(trip.sensors, function(d) { return d.isMotionSensor; }));
           } else {
-
-            $http.get(config.api.count(trip.props.id)).then(function(res) {
+            this.count(trip.props.id).then(function(res) {
+              debugger
               trip.sensors = _.omit(res.data, function(sensor) { return sensor.count <= 0; });
 
               // mark motion sensors
@@ -382,22 +359,26 @@
 
   .directive('map', [function(){
     return {
-      scope: { trip: '=' },
+      scope: { trip: '=', setState: '&' },
       restrict: 'E',
       link: function($scope, $element) {
-        $scope.$watch('trip.updated', function(data) {
-
-          var tripDataReady = (function() {
-            return !_($scope.data).select(function(d) { return d.data && d.data.length; }).map('data').flatten().size();
-          })();
-
-          if (tripDataReady) {
-            console.warn('angular map directive ___ $scope.data has changed! ___ RETURN');
-          } else {
-            console.info('angular map directive ___ $scope.data has changed! ___ RENDER COMPONENT');
-
+        $scope.$watch('trip.state.updated', function(trip) {
+          if ($scope.trip.state.updated) {
             React.renderComponent(Map({
-              trip: trip,
+
+              // only give non motion sensor data and extent state (BEWARE)
+              // sensors: _.omit($scope.trip.sensors, function(d) { return d.isMotionSensor; }),
+              extent: $scope.trip.state.extent || [],
+
+              gps: $scope.trip.sensors.sensor_gps,
+              har: $scope.trip.sensors.sensor_har,
+              tags: $scope.trip.sensors.sensor_tags,
+
+              setState: function(state) {
+                $scope.setState({state: state}); // <- like this
+              },
+
+              width: $element[0].parentNode.offsetWidth,
             }), $element[0]);
           }
 

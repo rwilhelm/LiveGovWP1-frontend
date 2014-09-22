@@ -11,7 +11,10 @@ var Map = React.createClass({
 
   getDefaultProps: function() {
     return {
+      tags: false,
+      gps: false,
       har: false,
+      colors: false,
       harColors: {
           'driving'  : '#53db5d',
           'running'  : '#6079df',
@@ -59,8 +62,6 @@ var Map = React.createClass({
     // when the component did mount and the dom node '#map' is available,
     // create the map and all layers and keep them in the components state
 
-    if (!this.props.data.sensor_gps) return;
-
     var map         = L.mapbox.map('map', 'rene.i6mdi15p'),
         gpsLayer    = L.mapbox.featureLayer().addTo(map),
         harLayer    = L.mapbox.featureLayer().addTo(map),
@@ -81,7 +82,7 @@ var Map = React.createClass({
     }
 
     // render tags as circles with a popup
-    if (this.props.data.sensor_tags) {
+    if (this.props.tags) {
       this.renderTags(map);
     }
 
@@ -142,11 +143,9 @@ var Map = React.createClass({
   // (3) join activities to prevent gaps in rendering
 
   generateGPSGeoJSON: function() {
-    var gps = this.props.data.sensor_gps;
-
     return {
       type: 'LineString',
-      coordinates: _(gps)
+      coordinates: _(this.props.gps.data)
         .map(function(coord) { return coord.lonlat.coordinates; })
         .unique(function(coord) { return coord.toString(); })
         .value()
@@ -154,15 +153,12 @@ var Map = React.createClass({
   },
 
   generateHARGeoJSON: function() {
-    var har = this.sum(this.props.data.sensor_har);
-    var gps = this.props.data.sensor_gps;
-
-    var features = har.map(function(activity) {
+    var features = this.sum(this.props.har.data).map(function(activity) {
       return {
         type: 'Feature',
         geometry: {
           type: 'LineString',
-          coordinates: this.props.data.sensor_gps
+          coordinates: this.props.gps.data
             .filter(function(d) { return d.ts >= activity.start && d.ts <= activity.stop; })
             .map(function(d) { return d.lonlat.coordinates; })
         },
@@ -195,15 +191,12 @@ var Map = React.createClass({
   },
 
   generateTagsGeoJSON: function() {
-    var tags = this.props.data.sensor_tags;
-    var gps = this.props.data.sensor_gps;
-
     return {
       type: 'FeatureCollection',
-      features: tags.map(function(tag) {
+      features: this.props.tags.data.map(function(tag) {
         return {
           type: 'Feature',
-          geometry: gps.
+          geometry: this.props.gps.data.
             filter(function(coord) { return coord.ts >= tag.ts; })[0].lonlat,
           properties: {
             tag: tag.tag,
@@ -218,25 +211,24 @@ var Map = React.createClass({
             popupContent: "<strong>Tag</strong>: " + tag.tag
           }
         };
-      })
+      }.bind(this))
     };
   },
 
   generateExtentGeoJSON: function() {
     var extent = this.props.extent;
-    var gps = this.props.data.sensor_gps;
 
     return {
       type: 'LineString',
-      coordinates: gps
+      coordinates: this.props.gps.data
         .filter(function(d) { return d.ts >= extent[0] && d.ts <= extent[1]; })
         .map(function(d) { return d.lonlat.coordinates; })
     }
   },
 
-  ///////////////////////////////
-  // XXX CHECK FOR CORRECTNESS //
-  ///////////////////////////////
+  ////////////////////////////////////
+  // XXX TODO CHECK FOR CORRECTNESS //
+  ////////////////////////////////////
 
   // summarize har tags
   sum: function(har) {

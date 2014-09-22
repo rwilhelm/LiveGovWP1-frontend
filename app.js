@@ -16,14 +16,9 @@
 
 	var Router = require('koa-router');
 
-  var config = require('./config');
-
 	var pg = require('koa-pg');
 
 	var queries = require('./config/database/queries');
-
-  var views = require('./config/views');
-	var schema = require('./config/items');
 
   app.use(logger);
   app.use(body);
@@ -33,10 +28,6 @@
   // ------------------------------------------------------------------------------------------
 
   var api = new Router();
-
-  api.get('/schema', function *() {
-  	this.body = schema;
-  });
 
   function extentToSQL(extent) {
     var e = extent.split(',');
@@ -53,20 +44,20 @@
   	this.body = result.rows;
   });
 
-  api.get('/trips/:tripId/check', function *() {
-    var result = yield this.pg.db.client.query_(q);
-    this.body = result.rows;
-  });
+  // api.get('/trips/:tripId/check', function *() {
+  //   var result = yield this.pg.db.client.query_(q);
+  //   this.body = result.rows;
+  // });
 
   // count sensor data for a trip
   //   curl -s localhost:3476/trips/850/count
-  api.get('/count/:tripId', function *() {
-    var result = yield this.pg.db.client.query_(queries.count(this.params.tripId, this.query.q));
-    var z = {};
-    _.forEach(result.rows, function(d) {
-	    z[_(d).keys().head()] = { count: _(d).values().head() };
-	  });
-    this.body = z;
+  api.get('/count/:tripId/:table', function *() {
+    var result = yield this.pg.db.client.query_(queries.count(this.params.tripId, this.params.table));
+   //  var z = {};
+   //  _.forEach(result.rows, function(d) {
+	  //   z[_(d).keys().head()] = { count: _(d).values().head() };
+	  // });
+    this.body = result.rows;
   });
 
   // get sensor data for a trip

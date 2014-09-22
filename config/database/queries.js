@@ -30,23 +30,8 @@
       return 'SELECT trip_id AS id, user_id AS user, start_ts AS start, stop_ts AS stop, name AS comment FROM trip ORDER BY trip_id DESC';
     },
 
-    check: function(id) {
-      return sensors.concat(moreSensors).map(function(sensor) {
-        return 'SELECT EXISTS(SELECT 1 FROM ' + sensor + ' WHERE trip_id = ' + id + ') AS ' + sensor;
-      }).join('; ');
-    },
-
-    // count: function(id, sensors) {
-    // 	if (typeof sensors === 'string') sensors = [sensors];
-    //   return sensors.map(function(sensor) {
-    //     return 'SELECT (SELECT COUNT(ts) FROM ' + sensor + ' WHERE trip_id = ' + id + ') AS ' + sensor;
-    //   }).join('; ');
-    // },
-
-    count: function(id) {
-      return sensors.concat(moreSensors).map(function(sensor) {
-        return 'SELECT (SELECT COUNT(ts) FROM ' + sensor + ' WHERE trip_id = ' + id + ') AS ' + sensor;
-      }).join('; ');
+    count: function(tripId, table) {
+      return 'SELECT (SELECT COUNT(ts) FROM ' + table + ' WHERE trip_id = ' + tripId + ') AS ' + table;
     },
 
     sensor: function(id, sensor, windowSize, extent) {
