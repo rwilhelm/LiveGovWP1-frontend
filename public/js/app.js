@@ -9,7 +9,10 @@
       trips: 'api/trips',
       tables: 'api/tables',
       columns: function(table) { return 'api/columns/' + table; },
+
+      // e.g. localhost:3000/api/trips/18/sensor_accelerometer
       sensors: function(id, sensor) { return 'api/trips/' + id + '/' + sensor; },
+
       count: function(id, table) { return 'api/count/' + id + '/' + table; },
     },
     windowSize: 200
@@ -102,15 +105,15 @@
     // actual app initialization
 
     // 1. load and prepare initial data
-    //    - xhr: all trips
-    //    - xhr: all tables and columns
+    //    - xhr: all trips ($scope.trips)
+    //    - xhr: all tables and columns ($scope.trip.tables)
 
     // 2. select a trip
-    //    - store selected trip object in $scope.trip
-    //    - xhr: count data for motion sensor tables
+    //    - store selected trip object ($scope.trip)
+    //    - xhr: count data for motion sensor tables ($scope.trip.sensors)
 
     // 3. prepare chart data
-    //    - create c3 chart data object for every motion sensor
+    //    - create d3 chart data object for every motion sensor
 
     $scope.trip = {
       props: {},
@@ -130,23 +133,29 @@
       $scope.trips = arr[1];
 
       console.info('>>> INIT DONE');
+      console.log('$scope.tables', $scope.tables);
+      console.log('$scope.trips', $scope.trips);
 
-      if ($state.params.tripId) { // <-- ui-router $state
+      if ($state.params.tripId) { // <-- ui-router $state: if trip_id in address bar is set
+        debugger
         $scope.selectTrip($state.params.tripId); // auto-select trip
         console.info('>>> TRIP SELECTED:', $state.params.tripId);
+        console.log('$scope.trip', $scope.trip);
       }
     });
 
     // click on a trip & load initial data
     $scope.selectTrip = function(id) {
-      $scope.trip.props = _($scope.trips).select({id: +id}).head();
-      Data.loadData($scope.trip)
-      .then(function() {
+      $scope.trip.props = _($scope.trips).select({id: +id}).head(); // select and pick first element
+      Data.loadData($scope.trip, $scope.tables)
+      .then(function() { // don't utilize any resolved value. $scope is manipiulated from service (stupid?)
         console.info('>>> TRIP READY', $scope.trip);
+        console.log('$scope.trip', $scope.trip);
         $state.go('raw', {tripId: id});
       });
     };
 
+    // on: ...
     $scope.setState = function(state) {
       _.assign($scope.trip.state, state);
       console.info('>>> STATE UPDATED', state);
@@ -160,15 +169,16 @@
     //   });
     // };
 
-    // change brush extent
+    // on: brush extend change
     $scope.loadMoreData = function(trip) {
+      // WILL UPDATE $scope.trip.data
       Data.loadData($scope.trip)
       .then(function() {
         console.info('>>> TRIP DATA UPDATED', $scope.trip);
       });
     };
 
-    // click a delete button in list view
+    // on: delete button click in trip list view
     $scope.deleteTrip = function(id) {
       $scope.trips = $scope.trips.filter(function(trip) { return trip.id !== id; });
       Data.deleteTrip(id).then(function() {
@@ -177,6 +187,7 @@
     };
 
     // type something to the name column in list view
+    // WILL UPDATE $scope.trip.props
     $scope.updateTrip = function(id, value) {
       Data.updateTrip(id, value).then(function() {
         console.info('>>> TRIP PROPS UPDATED:', id);
@@ -190,6 +201,7 @@
 
     return {
 
+      // get all table and corresponding column names and store them into ...
       tables: function() {
         var deferred = $q.defer();
 
@@ -217,13 +229,24 @@
 
       count: function(tripId) {
         var deferred = $q.defer();
-        debugger
-        var promises = _.keys(tables).map(function(table) {
+
+        // FIXME you cant just count for all tables, as there's e.g. auth and
+        // service_sld w/o trip_id or ts
+        // -> remove auth in back end after retrieval
+
+        // step101: get all tables
+        // step201: pick tables w/ trip_id and ts
+
+        // TODO clean up using _.all
+        // remove
+        var tablesWithTripId = _.pick(tables, function(table) { return _.contains(table, 'trip_id'); });
+        var tablesWithTripIdAndTs = _.pick(tablesWithTripId, function(table) { return _.contains(table, 'ts'); });
+
+        var promises = _.keys(tablesWithTripIdAndTs).map(function(table) {
           return $http.get(config.api.count(tripId, table));
         });
 
         $q.all(promises).then(function(data) {
-          debugger
           deferred.resolve(data);
         });
 
@@ -252,20 +275,43 @@
       },
 
       // get all sensor, gps and har data for a trip
-      loadData: function(trip) {
+      loadData: function(trip, tables) {
 
+        // resolves: $scope.trip.sensors, e.g.:
+        // $scope.trip.sensors = {
+        //   ...
+        // }
         var init = function() {
           var deferred = $q.defer();
 
+          // $scope.trip.state.updated is changed on ...
           if (trip.state.updated) {
             deferred.resolve(_.pick(trip.sensors, function(d) { return d.isMotionSensor; }));
           } else {
-            this.count(trip.props.id).then(function(res) {
-              debugger
-              trip.sensors = _.omit(res.data, function(sensor) { return sensor.count <= 0; });
+            this.count(trip.props.id).then(function(counts) {
+
+              // -> {sensor_velocity: "0", ...}
+              counts = _(counts).map('data').flatten().foldr(function(a,b){ return _.merge(a, b); });
+
+              trip.sensors = _.pick(counts, function(d) { return d; }); // to filter sensors w/o data: return d > 0
+
+              // {sensor_gps: {count:123}, ...}
+              trip.sensors = _.each(trip.sensors, function(v,k){ trip.sensors[k] = {}; trip.sensors[k].count = v; });
+
+              // [{name: sensor_gps, count:123}, ...]
+              // trip.sensors_.map(trip.sensors, function(v,k){ return {name:k, count:v.count}; });
+
+              _(tables).each(function(columns, tableName) {
+                if (trip.sensors.hasOwnProperty(tableName)) {
+                  trip.sensors[tableName].columns = columns;
+                } else {
+                  trip.sensors[tableName] = {};
+                  trip.sensors[tableName].columns = columns;
+                }}).value();
 
               // mark motion sensors
-              _(trip.sensors).forEach(function(sensor, sensorName) {
+              // trip.sensors is $scope.trip.sensors
+              _(trip.sensors).each(function(sensor, sensorName, a) {
                 sensor.isMotionSensor = _(['x', 'y', 'z']).all(function(xyz) {
                   return _(tables[sensorName]).values().contains(xyz); // XXX
                 });
@@ -280,28 +326,36 @@
         var deferred = $q.defer();
 
         init().then(function(sensors) {
+          // sensors = _.pick(sensors, function(sensor) { return sensor.isMotionSensor; });
+
+          sensors = _.pick(sensors, function(sensor) { return _.contains(sensor.columns, 'trip_id'); });
+          sensors = _.pick(sensors, function(sensor) { return _.contains(sensor.columns, 'ts'); });
+
           var queries = _(sensors).map(function(sensor, sensorName) {
-            return $http.get(config.api.sensors(trip.props.id, sensorName), {
-              params: {
-                'w': (trip.state.windowSize || config.windowSize),
-                'e': (trip.state.extent && trip.state.extent.join(","))
-              }
-            });
+            var options;
+            if (sensor.isMotionSensor) {
+              options = {
+                params: {
+                  'w': (trip.state.windowSize || config.windowSize),
+                  'e': (trip.state.extent && trip.state.extent.join(","))
+                }
+              };
+            }
+
+            return $http.get(config.api.sensors(trip.props.id, sensorName), options);
           });
 
+          // xhr to api for every sensorname, e.g. GET /api/13/sensor_velocity
           $q.all(queries)
           .then(function(sensors) {
             _.forEach(sensors, function(sensor) {
               var sensorName = _.last(sensor.config.url.split('/'));
-
               trip.sensors[sensorName].data = _.forEach(sensor.data, function(d) {
                 d.ts = +d.ts;
               });
 
             });
-
             trip.state.updated = Date.now();
-
             deferred.resolve();
           });
         });
@@ -362,6 +416,8 @@
       scope: { trip: '=', setState: '&' },
       restrict: 'E',
       link: function($scope, $element) {
+
+        // $scope.trip.state.updated is changed on ... (1/2)
         $scope.$watch('trip.state.updated', function(trip) {
           if ($scope.trip.state.updated) {
             React.renderComponent(Map({
@@ -392,6 +448,8 @@
       scope: { trip: '=', setState: '&' },
       restrict: 'E',
       link: function($scope, $element) {
+
+        // $scope.trip.state.updated is changed on ... (2/2)
         $scope.$watch('trip.state.updated', function(trip) {
           if ($scope.trip.state.updated) {
             React.renderComponent(Charts({

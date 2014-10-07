@@ -314,6 +314,14 @@ line {
   }
 }
 
+// triplist
+trips.ng-scope.ng-isolate-scope {
+  tr:hover {
+    color: #d5484e;
+  }
+  cursor: crosshair;
+};
+
 // .chartLegend {
 //   .sensorName {
 //     color: #333;

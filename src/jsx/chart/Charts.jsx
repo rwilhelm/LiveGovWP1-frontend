@@ -31,6 +31,10 @@ var Charts = React.createClass({
   },
 
   render: function() {
+
+    // don't draw charts for sensors without data
+    this.props.sensors = _.omit(this.props.sensors, function(sensor) { return sensor.data.length == 0; });
+
     var charts = _.map(this.props.sensors, function(sensor, sensorName) {
       return (
         <div key={sensorName} className='pure-g'>

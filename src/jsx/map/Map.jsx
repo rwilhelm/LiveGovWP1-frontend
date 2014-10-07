@@ -99,6 +99,7 @@ var Map = React.createClass({
   },
 
   render: function() {
+    debugger
     return (
       <div className='pure-g'>
         <div className='pure-u-24-24'>
@@ -154,6 +155,7 @@ var Map = React.createClass({
 
   generateHARGeoJSON: function() {
     var features = this.sum(this.props.har.data).map(function(activity) {
+      console.log(this.props.colors);
       return {
         type: 'Feature',
         geometry: {
