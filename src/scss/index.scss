@@ -95,10 +95,33 @@ table {
   margin-bottom: 150px;
 }
 
-.pure-menu {
+.pure-menu-views {
   border-bottom: 2px solid $color-x !important;
   margin-bottom: 16px;
   padding-bottom: 8px;
+}
+
+.pure-menu-login {
+  border-bottom: none;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  font-size: 0.8em;
+  text-align: right;
+}
+
+.logout {
+  text-decoration: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 4px 6px;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #db006d;
+  &:hover {
+    background-color: #db006d;
+    color: white;
+  }
 }
 
 menu {
@@ -398,4 +421,11 @@ form.options {
     height: 3em;
   }
   height: 3em;
+}
+
+// login form
+
+.login {
+  width: 30%;
+  margin: 5% auto;
 }

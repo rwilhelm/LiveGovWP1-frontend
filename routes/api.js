@@ -38,7 +38,6 @@
 	  // get all trips
 	  //   curl -s localhost:3476/trips
 	  api.get('/trips', function *() {
-	  	debugger
 	    // var result = yield this.pg.db.client.query_(queries.trips());
 	    var result = yield this.pg.db.client.query_(queries.trips(this.session.passport.user));
 	    this.body = result.rows;

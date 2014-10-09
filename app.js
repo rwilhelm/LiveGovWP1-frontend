@@ -23,7 +23,7 @@
   // views
   app.use(views('views', {
     default: 'html',
-    cache: true
+    cache: false
   }));
 
   // postgres
@@ -32,10 +32,14 @@
 
   // sessions
   var session = require('koa-generic-session');
-  app.keys = ['your-session-secret'];
+  app.keys = ['session-secret'];
   app.use(session({
     key: 'livegovwp1.sid', // cookie name
   }));
+
+  // must be public to get our css styles for the login form
+  app.use(mount('/', serve('public')));
+  app.use(mount('/lib', serve('bower_components')));
 
   // authentication
   var auth = new Router();
@@ -56,6 +60,9 @@
     }
   });
 
+  // our views don't need to be public
+  app.use(mount('/', serve('views')));
+
   var helper = new Router();
   require ('./routes/helper')(helper);
   app.use(mount('/api', helper.middleware()));
@@ -63,10 +70,6 @@
   var api = new Router();
   require ('./routes/api')(api);
   app.use(mount('/api', api.middleware()));
-
-  app.use(serve('public'));
-  app.use(mount('/', serve('views')));
-  app.use(mount('/lib', serve('bower_components')));
 
 	app.listen(3000);
 

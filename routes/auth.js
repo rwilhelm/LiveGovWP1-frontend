@@ -92,9 +92,11 @@ var lodash = require('lodash');
 
         if (user.length) {
           console.log('login successful');
+          // done(null, user[0], { message: 'you are now logged in' });
           done(null, user[0]);
         } else {
           console.log('login failed');
+          // done(null, false, { message: 'login failed. try again.' });
           done(null, false);
         }
       }
@@ -107,7 +109,9 @@ var lodash = require('lodash');
     // POST /login
     api.post('/login', passport.authenticate('local', {
         successRedirect: '/',
-        failureRedirect: '/login'
+        failureRedirect: '/login',
+        // successFlash: 'success',
+        failureFlash: true
       })
     );
 
