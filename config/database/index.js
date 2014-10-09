@@ -7,6 +7,12 @@
 
   var preparedStatements = {
 
+    // get users/passwords (weak! back end only!)
+    auth: {
+      name: 'auth',
+      text: 'SELECT * FROM auth'
+    },
+
     // get all trips
     allTrips: {
       name: 'getAllTrips',

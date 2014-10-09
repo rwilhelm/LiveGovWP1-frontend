@@ -99,7 +99,7 @@ var Map = React.createClass({
   },
 
   render: function() {
-    debugger
+    // debugger
     return (
       <div className='pure-g'>
         <div className='pure-u-24-24'>

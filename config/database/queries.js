@@ -16,7 +16,16 @@
     });
   });
 
+  function extentToSQL(extent) {
+    var e = extent.split(',');
+    return ' AND ts >= ' + e[0] + ' AND ts <= ' + e[1];
+  }
+
 	module.exports = {
+
+    auth: function() {
+      return "SELECT * FROM auth";
+    },
 
 		allTables: function() {
 			return "SELECT c.relname FROM pg_catalog.pg_class c LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE c.relkind IN ('r','') AND n.nspname <> 'pg_catalog'AND n.nspname <> 'information_schema'AND n.nspname !~ '^pg_toast'AND pg_catalog.pg_get_userbyid(c.relowner) != 'postgres' AND pg_catalog.pg_table_is_visible(c.oid) ORDER BY 1";
@@ -26,8 +35,9 @@
 			return "SELECT attname FROM pg_attribute WHERE attrelid = 'public." + tableName + "'::regclass AND attnum > 0 AND NOT attisdropped ORDER BY attnum";
 		},
 
-    trips: function() {
-      return 'SELECT trip_id AS id, user_id AS user, start_ts AS start, stop_ts AS stop, name AS comment FROM trip ORDER BY trip_id DESC';
+    // only get trips for the given username
+    trips: function(username) {
+      return 'SELECT trip_id AS id, user_id AS user, start_ts AS start, stop_ts AS stop, name AS comment FROM trip WHERE user_id = \'' + username + '\' ORDER BY trip_id DESC';
     },
 
     count: function(tripId, table) {

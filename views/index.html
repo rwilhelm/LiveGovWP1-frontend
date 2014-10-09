@@ -31,13 +31,13 @@
         <a ui-sref='trips'>Records</a>
       </li>
       <li>
-        <a ui-sref='raw({tripId: trip.id})'>Raw Data</a>
+        <a ui-sref='raw({tripId: trip.props.id})'>Raw Data</a>
       </li>
       <li>
-        <a ui-sref='har({tripId: trip.id})'>Activity Recognition</a>
+        <a ui-sref='har({tripId: trip.props.id})'>Activity Recognition</a>
       </li>
       <li>
-        <a ui-sref='sld({tripId: trip.id})'>Service Line Detection</a>
+        <a ui-sref='sld({tripId: trip.props.id})'>Service Line Detection</a>
       </li>
     </ul>
   </header>

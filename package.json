@@ -19,18 +19,22 @@
     "gulp-util": "^3.0.1",
     "koa": "^0.12.1",
     "koa-body": "^0.2.0",
+    "koa-bodyparser": "^1.0.1",
     "koa-compress": "^1.0.8",
+    "koa-generic-session": "^1.2.2",
     "koa-logger": "^1.2.2",
     "koa-mount": "^1.3.0",
     "koa-passport": "^1.1.0",
     "koa-pg": "^0.23.0",
+    "koa-redis": "^0.1.1",
     "koa-router": "^3.4.0",
     "koa-send": "^1.3.1",
     "koa-ssl": "^1.0.1",
     "koa-static": "^1.4.7",
     "koa-views": "^2.1.0",
     "lodash": "^2.4.1",
-    "monk": "^0.9.0"
+    "monk": "^0.9.0",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {},
   "scripts": {

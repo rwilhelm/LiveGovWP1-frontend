@@ -137,7 +137,6 @@
       console.log('$scope.trips', $scope.trips);
 
       if ($state.params.tripId) { // <-- ui-router $state: if trip_id in address bar is set
-        debugger
         $scope.selectTrip($state.params.tripId); // auto-select trip
         console.info('>>> TRIP SELECTED:', $state.params.tripId);
         console.log('$scope.trip', $scope.trip);
@@ -146,6 +145,15 @@
 
     // click on a trip & load initial data
     $scope.selectTrip = function(id) {
+      // reset before selecting a new trip
+      $scope.trip = {
+        props: {},
+        state: {
+          updated: false
+        },
+        sensors: {}
+      };
+
       $scope.trip.props = _($scope.trips).select({id: +id}).head(); // select and pick first element
       Data.loadData($scope.trip, $scope.tables)
       .then(function() { // don't utilize any resolved value. $scope is manipiulated from service (stupid?)
@@ -161,13 +169,6 @@
       console.info('>>> STATE UPDATED', state);
       $scope.loadMoreData($scope.trip);
     };
-
-    // $scope.loadData = function(trip) {
-    //   Data.loadData($scope.trip)
-    //   .then(function() {
-    //     console.info('>>> TRIP DATA LOADED', $scope.trip);
-    //   });
-    // };
 
     // on: brush extend change
     $scope.loadMoreData = function(trip) {
@@ -424,6 +425,7 @@
 
               // only give non motion sensor data and extent state (BEWARE)
               // sensors: _.omit($scope.trip.sensors, function(d) { return d.isMotionSensor; }),
+
               extent: $scope.trip.state.extent || [],
 
               gps: $scope.trip.sensors.sensor_gps,
@@ -466,6 +468,27 @@
             }), $element[0]);
           }
 
+        });
+      }
+    };
+  }])
+
+  .directive('har', [function(){
+    return {
+      scope: { trip: '=' },
+      restrict: 'E',
+      link: function($scope, $element) {
+        $scope.$watch('trip.state.updated', function(trip) {
+          if ($scope.trip.state.updated) {
+            React.renderComponent(HarBrush({
+              color: $scope.merge,
+              setState: function(state) {
+                $scope.setState({state: state}); // <- like this
+              },
+
+              width: $element[0].parentNode.offsetWidth,
+            }), $element[0]);
+          }
         });
       }
     };

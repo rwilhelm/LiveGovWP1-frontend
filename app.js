@@ -3,110 +3,70 @@
 (function() {
 	'use strict';
 
-  var _ = require('lodash'),
+  var lodash = require('lodash'),
       Promise = require('bluebird');
 
-  var app      = require('koa')(),
-      compress = require('koa-compress')(),
-      logger   = require('koa-logger')(),
-      body     = require('koa-body')();
+  var app        = require('koa')(),
+      bodyparser = require('koa-bodyparser'),
+      compress   = require('koa-compress'),
+      logger     = require('koa-logger'),
+      mount      = require('koa-mount'),
+      Router     = require('koa-router'),
+      serve      = require('koa-static'),
+      views      = require('koa-views');
 
-  var mount  = require('koa-mount'),
-      serve  = require('koa-static');
+  // random middleware
+  app.use(logger());
+  app.use(bodyparser());
+  app.use(compress());
 
-	var Router = require('koa-router');
+  // views
+  app.use(views('views', {
+    default: 'html',
+    cache: true
+  }));
 
-	var pg = require('koa-pg');
+  // postgres
+  var pg = require('koa-pg');
+  app.use(pg('pg://postgres:liveandgov@localhost:3333/liveandgov_dev'));
 
-	var queries = require('./config/database/queries');
+  // sessions
+  var session = require('koa-generic-session');
+  app.keys = ['your-session-secret'];
+  app.use(session({
+    key: 'livegovwp1.sid', // cookie name
+  }));
 
-  app.use(logger);
-  app.use(body);
-  app.use(compress);
-	app.use(pg('pg://postgres:liveandgov@localhost:3333/liveandgov_dev'));
+  // authentication
+  var auth = new Router();
+  var passport = require('koa-passport');
+  app.use(passport.initialize());
+  app.use(passport.session());
+  require ('./routes/auth')(app, auth, passport);
+  app.use(auth.middleware());
 
-  // ------------------------------------------------------------------------------------------
+  app.use(function*(next) {
+    if (this.isAuthenticated()) {
+      console.log('authenticated');
+      yield next;
+    } else {
+      console.log('not authenticated');
+      console.log("redirecting to /login");
+      this.redirect('/login');
+    }
+  });
+
+  var helper = new Router();
+  require ('./routes/helper')(helper);
+  app.use(mount('/api', helper.middleware()));
 
   var api = new Router();
-
-  function extentToSQL(extent) {
-    var e = extent.split(',');
-    return ' AND ts >= ' + e[0] + ' AND ts <= ' + e[1];
-  }
-
-  api.get('/tables', function *() {
-    var result = yield this.pg.db.client.query_(queries.allTables());
-    this.body = result.rows;
-  });
-
-  api.get('/columns/:tableName', function *() {
-  	var result = yield this.pg.db.client.query_(queries.tableColumns(this.params.tableName));
-  	this.body = result.rows;
-  });
-
-  // api.get('/trips/:tripId/check', function *() {
-  //   var result = yield this.pg.db.client.query_(q);
-  //   this.body = result.rows;
-  // });
-
-  // count sensor data for a trip
-  //   curl -s localhost:3476/trips/850/count
-  api.get('/count/:tripId/:table', function *() {
-    var result = yield this.pg.db.client.query_(queries.count(this.params.tripId, this.params.table));
-   //  var z = {};
-   //  _.forEach(result.rows, function(d) {
-	  //   z[_(d).keys().head()] = { count: _(d).values().head() };
-	  // });
-    this.body = result.rows;
-  });
-
-  // get sensor data for a trip
-  //   curl -s localhost:3476/trips/850/acc
-  //   curl -s localhost:3476/trips/850/acc\?w=200
-  //   curl -s localhost:3476/trips/850/acc\?w=200\&e=1394518675333,1394518346639
-  api.get('/trips/:tripId/:sensor', function *() {
-    var extent = this.query.e ? extentToSQL(this.query.e) : '';
-    var result = yield this.pg.db.client.query_(
-      queries.sensor(this.params.tripId, this.params.sensor, this.query.w, extent));
-    this.body = result.rows;
-  });
-
-  // get all trips
-  //   curl -s localhost:3476/trips
-  api.get('/trips', function *() {
-    var result = yield this.pg.db.client.query_(queries.trips());
-    this.body = result.rows;
-  });
-
-  // delete a trip
-  api.del('/trips/:tripId', function *() {
-    yield this.pg.db.client.query_(queries.delete(this.params.tripId));
-    this.status = 204;
-  });
-
-  // undelete a trip
-  api.post('/trips/:tripId/undelete', function *() {
-    yield this.pg.db.client.query_(queries.undelete(this.params.tripId));
-    this.status = 204;
-  });
-
-  // update a trip
-  api.post('/trips/:tripId', function *() {
-    yield this.pg.db.client.query_(queries.update(this.params.tripId, this.request.body));
-    this.status = 204;
-  });
-
-  // get index html template
-  api.get('/', function *index() {
-    yield this.render('index', {env: process.env.NODE_ENV});
-  });
-
-  // ------------------------------------------------------------------------------------------
+  require ('./routes/api')(api);
+  app.use(mount('/api', api.middleware()));
 
   app.use(serve('public'));
   app.use(mount('/', serve('views')));
   app.use(mount('/lib', serve('bower_components')));
-  app.use(mount('/api', api.middleware()));
 
 	app.listen(3000);
 
